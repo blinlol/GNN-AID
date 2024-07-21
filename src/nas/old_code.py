@@ -1,4 +1,4 @@
-# from models_builder.conducting_series_experiments_gnn import ConductingSeriesExperimentsGNN
+from models_builder.conducting_series_experiments_gnn import ConductingSeriesExperimentsGNN
 
 
 from aux.configs import ModelManagerConfig, ModelModificationConfig, ModelConfig, ModelStructureConfig
@@ -574,8 +574,8 @@ manager_config = {
 
 #region pubmed
 
-# pubmed_params = [
-#     {'structure_kwargs':{'layer': gcn_layer, 'layers_number': 1}, 'epochs': 320},
+pubmed_params = [
+    {'structure_kwargs':{'layer': gcn_layer, 'layers_number': 1}, 'epochs': 1},
 #     {'structure_kwargs':{'layer': gcn_layer, 'layers_number': 2}, 'epochs': 180},
 #     {'structure_kwargs':{'layer': gcn_layer, 'layers_number': 3}, 'epochs': 150},
 
@@ -637,9 +637,9 @@ manager_config = {
 #     {'structure_kwargs':{'layer': gmm_layer, 'layers_number': 1}, 'epochs': 300},
 #     {'structure_kwargs':{'layer': gmm_layer, 'layers_number': 2}, 'epochs': 300},
 #     {'structure_kwargs':{'layer': gmm_layer, 'layers_number': 3}, 'epochs': 300}
-# ]
-# number_runs = 5
-# run_experiments_with_params('pubmed', pubmed_params)
+]
+number_runs = 1
+run_experiments_with_params('pubmed', pubmed_params)
 #endregion
 
 
