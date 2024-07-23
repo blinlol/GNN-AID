@@ -2,6 +2,8 @@ import logging
 import torch
 import torch.nn.functional as F
 
+from pydantic import BaseModel, Field
+
 from nas.search_space import SearchSpace
 from nas.misc import get_variable
 
@@ -9,33 +11,48 @@ from nas.misc import get_variable
 logger = logging.getLogger(__name__)
 
 
+class ControllerArgs(BaseModel):
+    class Forward(BaseModel):
+        # не понимаю зачем нужны
+        mode: str = 'train'
+        softmax_temp: float = 5.
+        tanh_c: float = 2.5
+
+    
+    class Reset(BaseModel):
+        # радиус значений в котором инициализировать параметры
+        init_range: float = 0.1
+
+    # второе измерение матрицы hidden
+    hidden_size: int = 100
+    reset: Reset = Field(default_factory=Reset)
+    forward: Forward = Field(default_factory=Forward)
+
+
 class NasController(torch.nn.Module):
-    def __init__(self, search_space: SearchSpace, 
-                 controller_hid=100,
-                 mode='train'):
+    def __init__(self, search_space: SearchSpace, args: ControllerArgs):
         super().__init__()
 
-        self.search_space = search_space
-        self.controller_hid = controller_hid
-        self.mode = mode
-        
+        self.ss = search_space
+        self.args = args
+
         self.num_tokens = []
-        for key, val in self.search_space.dict.items():
+        for key, val in self.ss.dict.items():
             self.num_tokens.append(len(val))
+
         self.encoder = torch.nn.Embedding(
             num_embeddings=sum(self.num_tokens),
-            embedding_dim=controller_hid
+            embedding_dim=self.args.hidden_size
         )
-
         self.lstm = torch.nn.LSTMCell(
-            input_size=controller_hid,
-            hidden_size=controller_hid
+            input_size=self.args.hidden_size,
+            hidden_size=self.args.hidden_size
         )
 
         self.decoders = torch.nn.ModuleDict()
         for key, val in search_space.dict.items():
             decoder = torch.nn.Linear(
-                in_features=controller_hid,
+                in_features=self.args.hidden_size,
                 out_features=len(val)
             )
             self.decoders[key] = decoder
@@ -43,43 +60,40 @@ class NasController(torch.nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
-        init_range = 0.1
+        init_range = self.args.reset.init_range
         for param in self.parameters():
             param.data.uniform_(-init_range, init_range)
         for decoder in self.decoders:
             self.decoders[decoder].bias.data.fill_(0)
     
     def forward(self, inputs, hidden, action):
-        softmax_temp = 5
-        tanh_c = 2.5
-
         embed = inputs
         hx, cx = self.lstm(embed, hidden)
-        logits = self.decoders[action](hx) / softmax_temp
-        if self.mode == 'train':
-            logits = (tanh_c * torch.tanh(logits))
-
+        logits = self.decoders[action](hx) / self.args.forward.softmax_temp
+        if self.args.forward.mode == 'train':
+            logits = (self.args.forward.tanh_c * torch.tanh(logits))
         return logits, (hx, cx)
     
     def construct_action(self, actions):
         structure_list = []
         for single_action in actions:
             structure = []
-            for action, action_name in zip(single_action, self.search_space.list):
-                predicted_actions = self.search_space.dict[action_name][action]
+            for action, action_name in zip(single_action, self.ss.list):
+                predicted_actions = self.ss.dict[action_name][action]
                 structure.append(predicted_actions)
             structure_list.append(structure)
         return structure_list
 
     def sample(self, batch_size=1, with_details=False):
         '''семплирует batch_size архитектур из пространства поиска переданного конструктором'''
-        inputs = torch.zeros([batch_size, self.controller_hid])
-        hidden = (torch.zeros([batch_size, self.controller_hid]), torch.zeros([batch_size, self.controller_hid]))
+        inputs = torch.zeros([batch_size, self.args.hidden_size])
+        hidden = (torch.zeros([batch_size, self.args.hidden_size]), torch.zeros([batch_size, self.args.hidden_size]))
         entropies = []
         log_probs = []
         actions = []
-        for block_i, action_name in enumerate(self.search_space.list):
-            decoder_i = self.search_space.ind_by_name(action_name)
+
+        for action_name in self.ss.list:
+            decoder_i = self.ss.ind_by_name(action_name)
 
             logits, hidden = self.forward(inputs, hidden, action_name)
             probs = F.softmax(logits, dim=-1)
@@ -107,8 +121,8 @@ class NasController(torch.nn.Module):
             return dags, torch.cat(log_probs), torch.cat(entropies)
         return dags
 
-    def init_hidden(self, batch_size=64):
-        # batch_size за что отвечает???
-        zeros = torch.zeros(batch_size, self.controller_hid)
-        return (get_variable(zeros, requires_grad=False),
-                get_variable(zeros.clone(), requires_grad=False))
+    # def init_hidden(self, batch_size=64):
+    #     # batch_size за что отвечает???
+    #     zeros = torch.zeros(batch_size, self.args.hidden_size)
+    #     return (get_variable(zeros, requires_grad=False),
+    #             get_variable(zeros.clone(), requires_grad=False))

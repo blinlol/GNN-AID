@@ -2,7 +2,7 @@ import warnings
 import sys
 import logging
 
-from nas.controller import NasController
+from nas.controller import NasController, ControllerArgs
 from nas.search_space import SearchSpace
 from nas.trainer import Trainer, TrainerArgs
 
@@ -15,7 +15,8 @@ cora =  ("single-graph", "Planetoid", 'Cora')
 mutag = ('multiple-graphs', 'TUDataset', 'MUTAG')
 
 ss = SearchSpace(mutag)
-nas = NasController(ss)
+nas_args = ControllerArgs()
+nas = NasController(ss, nas_args)
 tr_args = TrainerArgs()
 trainer = Trainer(ss, nas, tr_args)
 # nas.sample()
