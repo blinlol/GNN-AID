@@ -1,6 +1,9 @@
 import logging
 import numpy as np
+import pickle
 import torch
+
+from pydantic import BaseModel, Field
 
 from aux.configs import (
     ModelManagerConfig,
@@ -30,10 +33,41 @@ def scale(value, last_k=10, scale_value=1):
     return scale_value / max_reward * value
 
 
+class TrainerArgs(BaseModel):
+    class Train(BaseModel):
+        # количество итераций обучения контроллера
+        num_epochs: int = 3
+        # периодичность сохранения тренера
+        save_epoch: int = 2
+        # флаг запуска выполнения derive после обучения
+        derive_finaly: bool = False
+    
+    class Eval(BaseModel):
+        # количество эпох обучения модели
+        steps: int = 4
+        # передается в train_model, хз зачем
+        save_model_flag: bool = False
+    
+    class TrainController(BaseModel):
+        # количество эпох обучения контроллера на каждой итерации
+        epochs: int = 3
+    
+    class Derive(BaseModel):
+        # нереализованная функциональность
+        derive_from_history: bool = False
+    
+    train: Train = Field(default_factory=Train)
+    eval: Eval = Field(default_factory=Eval)
+    train_controller: TrainController = Field(default_factory=TrainController)
+    derive: Derive = Field(default_factory=Derive)
+    # save fname
+
+
 class Trainer:
-    def __init__(self, ss: SearchSpace, nas: NasController):
+    def __init__(self, ss: SearchSpace, nas: NasController, args: TrainerArgs):
         self.ss = ss
         self.nas = nas
+        self.args = args
 
         # move optimizer to contoller?
         self.controller_step = 0  # counter for controller
@@ -41,14 +75,15 @@ class Trainer:
 
 
     def save(self):
-        pass
+        fname = f"save/Trainer_{self.controller_step}.pkl"
+        with open(fname, "wb") as f:
+            pickle.dump(self, f)
 
 
     def train(self):
-        num_epochs = 3
-        derive_num_sample = 100
-        save_epoch = 2
-        derive_finaly = False
+        num_epochs = self.args.train.num_epochs
+        save_epoch = self.args.train.save_epoch
+        derive_finaly = self.args.train.derive_finaly
 
         for epoch in range(num_epochs):
             self.train_controller()
@@ -68,8 +103,8 @@ class Trainer:
         """
         # TODO: оптимизировать вызовы конструкторов
 
-        steps_epochs = 4
-        save_model_flag = False
+        steps = self.args.eval.steps
+        save_model_flag = self.args.eval.save_model_flag
 
         manager_config = ModelManagerConfig(**{
                 "mask_features": [],
@@ -90,11 +125,11 @@ class Trainer:
             gnn=gnn,
             dataset_path=self.ss.results_dataset_path,
             manager_config=manager_config,
-            modification=ModelModificationConfig(model_ver_ind=0, epochs=steps_epochs)
+            modification=ModelModificationConfig(model_ver_ind=0, epochs=steps)
         )
         gnn_model_manager.epochs = gnn_model_manager.modification.epochs = 0
 
-        train_test_split_path = gnn_model_manager.train_model(gen_dataset=self.ss.dataset, steps=steps_epochs,
+        train_test_split_path = gnn_model_manager.train_model(gen_dataset=self.ss.dataset, steps=steps,
                                                             save_model_flag=save_model_flag,
                                                             metrics=[Metric("Accuracy", mask='train')])
 
@@ -130,7 +165,7 @@ class Trainer:
 
     def train_controller(self):
         # parameters
-        controller_epochs = 3
+        controller_epochs = self.args.train_controller.epochs
 
         # init nas
         self.nas.train() # set training mode
@@ -180,10 +215,10 @@ class Trainer:
 
     def derive(self, sample_num=None):
         """возвращает лучшую архитектуру"""
-        derive_from_history = True
+        derive_from_history = self.args.derive.derive_from_history
 
         if sample_num is None and derive_from_history:
-            # можно поддержать возможность из файла брать историю
+            #TODO: поддержать возможность из файла брать историю
             return self.derive_from_history()
         
         sampled_structures = self.nas.sample(sample_num)

@@ -4,7 +4,7 @@ import logging
 
 from nas.controller import NasController
 from nas.search_space import SearchSpace
-from nas.trainer import Trainer
+from nas.trainer import Trainer, TrainerArgs
 
 warnings.filterwarnings("ignore")
 
@@ -16,7 +16,8 @@ mutag = ('multiple-graphs', 'TUDataset', 'MUTAG')
 
 ss = SearchSpace(mutag)
 nas = NasController(ss)
-trainer = Trainer(ss, nas)
+tr_args = TrainerArgs()
+trainer = Trainer(ss, nas, tr_args)
 # nas.sample()
 trainer.train()
 
