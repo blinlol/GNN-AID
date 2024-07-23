@@ -1,4 +1,5 @@
 import logging
+from enum import StrEnum
 
 from collections import OrderedDict
 from copy import deepcopy
@@ -16,14 +17,33 @@ from nas.misc import (
 logger = logging.getLogger(__name__)
 
 
-class SearchSpace:
-    dict_layer_by_gnn = {
-        'gcn': gcn_layer,
-        'gin': gin_layer
+class GNN(StrEnum):
+    gcn = 'gcn'
+    gin = 'gin'
+
+    @classmethod
+    def str(cls):
+        return 'gnn'
+
+
+
+class Pool(StrEnum):
+    add = 'global_add_pool'
+    mean = 'global_mean_pool'
+
+    @classmethod
+    def str(cls):
+        return 'pool'
+
+
+dict_layer_by_gnn = {
+        GNN.gcn: gcn_layer,
+        GNN.gin: gin_layer
     }
 
+
+class SearchSpace:
     def __init__(self, dataset_full_name):
-        # self.graph_level = graph_level
         self.dataset, self.data, self.results_dataset_path = DatasetManager.get_by_full_name(
             full_name=dataset_full_name,
             dataset_attack_type='original',
@@ -33,10 +53,10 @@ class SearchSpace:
         self.graph_level = self.dataset.is_multi()
 
         self.ss = OrderedDict({
-            'gnn': ['gcn', 'gin']
+            GNN.str(): [g.split('.')[-1] for g in GNN]
         })
         if self.graph_level:
-            self.ss['pool'] = ['global_add_pool', 'global_mean_pool']
+            self.ss[Pool.str()] = [p.split('.')[-1] for p in Pool]
 
     @property
     def dict(self) -> OrderedDict:
@@ -45,8 +65,8 @@ class SearchSpace:
     @property
     def list(self) -> list[str]:
         if self.graph_level:
-            return ['gnn', 'gnn', 'pool']
-        return ['gnn', 'gnn']
+            return [GNN.str(), GNN.str(), Pool.str()]
+        return [GNN.str(), GNN.str()]
     
     def ind_by_name(self, action_name: str) -> int:
         for i, key in enumerate(self.ss):
@@ -55,9 +75,9 @@ class SearchSpace:
 
     def node_task_structure(self, sampled_structure, num_feat, num_classes):
         structure = []
-        num_layers = len(sampled_structure['gnn'])
-        for i, gnn in enumerate(sampled_structure['gnn']):
-            layer = deepcopy(SearchSpace.dict_layer_by_gnn[gnn])
+        num_layers = len(sampled_structure[GNN.str()])
+        for i, gnn in enumerate(sampled_structure[GNN.str()]):
+            layer = deepcopy(dict_layer_by_gnn[gnn])
             in_dim = 16
             out_dim = 16
 
@@ -75,10 +95,10 @@ class SearchSpace:
 
     def graph_task_structure(self, sampled_structure, num_feat, num_classes):
         structure = []
-        num_node_layers = len(sampled_structure['gnn'])
+        num_node_layers = len(sampled_structure[GNN.str()])
 
-        for i, gnn in enumerate(sampled_structure['gnn']):
-            layer = deepcopy(SearchSpace.dict_layer_by_gnn[gnn])
+        for i, gnn in enumerate(sampled_structure[GNN.str()]):
+            layer = deepcopy(dict_layer_by_gnn[gnn])
             in_dim = 16
             out_dim = 16
 
@@ -117,7 +137,7 @@ class SearchSpace:
         sampled_structure = {}
  
         for key, val in zip(self.list, sampled_gnn):
-            if key == 'gnn':
+            if key == GNN.str():
                 sampled_structure[key] = sampled_structure.get(key, []) + [val]
             else:
                 sampled_structure[key] = val
