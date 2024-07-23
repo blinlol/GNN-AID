@@ -1,3 +1,6 @@
+import sys
+import logging
+
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -11,6 +14,9 @@ from aux.configs import ModelManagerConfig, ModelModificationConfig, ModelConfig
 from base.datasets_processing import DatasetManager
 from models_builder.gnn_constructor import FrameworkGNNConstructor
 from models_builder.gnn_models import FrameworkGNNModelManager, Metric
+
+
+logger = logging.getLogger()
 
 
 #TODO: use enum for search space keys, vals (pydantic)
@@ -179,8 +185,6 @@ def scale(value, last_k=10, scale_value=1):
     return scale_value / max_reward * value
 
 
-
-
 class SearchSpace:
     dict_layer_by_gnn = {
         'gcn': gcn_layer,
@@ -194,8 +198,8 @@ class SearchSpace:
             dataset_attack_type='original',
             dataset_ver_ind=0
         )
-        self.dataset.train_test_split()
-        self.graph_level = dataset_full_name[0] == 'multiple-graphs'
+        self.dataset.train_test_split(percent_train_class=0.6)
+        self.graph_level = self.dataset.is_multi()
 
         self.ss = OrderedDict({
             'gnn': ['gcn', 'gin']
@@ -406,19 +410,37 @@ class Trainer:
         self.controller_step = 0  # counter for controller
         self.controller_optim = torch.optim.Adam(self.nas.parameters(), lr=0.005)
 
-    
+
+    def save(self):
+        pass
+
+
     def train(self):
         num_epochs = 3
+        derive_num_sample = 100
+        save_epoch = 2
+        derive_finaly = False
 
         for epoch in range(num_epochs):
             self.train_controller()
-            self.derive()
-    
-    def get_reward(self, sampled_gnns, entropies):
+            # семплирует и измерять архитектуры, не понятно зачем
+            # self.derive(derive_num_sample)
+            # сохраняет если нужно
+            if epoch % save_epoch == 0:
+                self.save()
+        
+        if derive_finaly:
+            self.best_structure = self.derive()
+            logger.info("Trainer::train self.best_structure = %r", self.best_structure)
+        self.save()
+        
+    def eval(self, sampled_gnn):
+        """обучает переданную архитектуру и возвращает скор на валидации
         """
-        sampled_gnns: list of sampled structures from nas
-        """
+        # TODO: оптимизировать вызовы конструкторов
 
+        steps_epochs = 4
+        save_model_flag = False
 
         manager_config = ModelManagerConfig(**{
                 "mask_features": [],
@@ -428,44 +450,54 @@ class Trainer:
                 }
             }
         )
-        steps_epochs = 1
-        save_model_flag = True
+
+        gnn = self.ss.create_gnn_structure(sampled_gnn)
+        gnn = FrameworkGNNConstructor(
+                model_config=ModelConfig(
+                    structure=ModelStructureConfig(gnn)
+                )
+            )
+        gnn_model_manager = FrameworkGNNModelManager(
+            gnn=gnn,
+            dataset_path=self.ss.results_dataset_path,
+            manager_config=manager_config,
+            modification=ModelModificationConfig(model_ver_ind=0, epochs=steps_epochs)
+        )
+        gnn_model_manager.epochs = gnn_model_manager.modification.epochs = 0
+
+        train_test_split_path = gnn_model_manager.train_model(gen_dataset=self.ss.dataset, steps=steps_epochs,
+                                                            save_model_flag=save_model_flag,
+                                                            metrics=[Metric("Accuracy", mask='train')])
+
+        if train_test_split_path is not None:
+            self.ss.dataset.save_train_test_mask(train_test_split_path)
+            train_mask, val_mask, test_mask, train_test_sizes = torch.load(train_test_split_path / 'train_test_split')[
+                                                                :]
+            self.ss.dataset.train_mask, self.ss.dataset.val_mask, self.ss.dataset.test_mask = train_mask, val_mask, test_mask
+            self.ss.data.percent_train_class, self.ss.data.percent_test_class = train_test_sizes
+
+
+        metric = Metric("Accuracy", mask='val')
+        metric_loc = gnn_model_manager.evaluate_model(
+            gen_dataset=self.ss.dataset, metrics=[metric])
+        logger.info("Trainer::eval sampled_gnn = %r, metric_loc = %r",sampled_gnn, metric_loc)
+        return metric_loc['val']['Accuracy']
+
+    def get_reward(self, sampled_gnns, entropies=None):
+        """
+        sampled_gnns: list of sampled structures from nas
+        entropies: if None return list, else np
+        return: list of rewards 
+        """
+        # TODO: add entropies
+
         rewards = [] # list of validation accuracies
         for gnn in sampled_gnns:
-            gnn = self.ss.create_gnn_structure(gnn)
-            gnn = FrameworkGNNConstructor(
-                    model_config=ModelConfig(
-                        structure=ModelStructureConfig(gnn)
-                    )
-                )
-            gnn_model_manager = FrameworkGNNModelManager(
-                gnn=gnn,
-                dataset_path=self.ss.results_dataset_path,
-                manager_config=manager_config,
-                modification=ModelModificationConfig(model_ver_ind=0, epochs=steps_epochs)
-            )
-            gnn_model_manager.epochs = gnn_model_manager.modification.epochs = 0
+            rewards.append(self.eval(gnn))
 
-            train_test_split_path = gnn_model_manager.train_model(gen_dataset=self.ss.dataset, steps=steps_epochs,
-                                                              save_model_flag=save_model_flag,
-                                                              metrics=[Metric("Accuracy", mask='train')])
-
-            if train_test_split_path is not None:
-                self.ss.dataset.save_train_test_mask(train_test_split_path)
-                train_mask, val_mask, test_mask, train_test_sizes = torch.load(train_test_split_path / 'train_test_split')[
-                                                                    :]
-                self.ss.dataset.train_mask, self.ss.dataset.val_mask, self.ss.dataset.test_mask = train_mask, val_mask, test_mask
-                self.ss.data.percent_train_class, self.ss.data.percent_test_class = train_test_sizes
-
-
-            metric = Metric("Accuracy", mask='val')
-            metric_loc = gnn_model_manager.evaluate_model(
-                gen_dataset=self.ss.dataset, metrics=[metric])
-            print(metric_loc)
-            # TODO: add entropies
-            rewards.append(metric_loc['val']['Accuracy'])
-        rewards = rewards * np.ones_like(entropies)
-        return rewards
+        if entropies is None:
+            return rewards
+        return rewards * np.ones_like(entropies)
 
     def train_controller(self):
         # parameters
@@ -473,7 +505,7 @@ class Trainer:
 
         # init nas
         self.nas.train() # set training mode
-        hidden = self.nas.init_hidden()
+        # hidden = self.nas.init_hidden()
 
         # definitions
         total_loss = 0
@@ -517,23 +549,37 @@ class Trainer:
 
             self.controller_step += 1
 
+    def derive(self, sample_num=None):
+        """возвращает лучшую архитектуру"""
+        derive_from_history = True
 
-    def derive(self):
-        pass
+        if sample_num is None and derive_from_history:
+            # можно поддержать возможность из файла брать историю
+            return self.derive_from_history()
+        
+        sampled_structures = self.nas.sample(sample_num)
+        rewards = self.get_reward(sampled_structures)
+        min_i = np.argmin(rewards)
+        return sampled_structures[min_i]
 
 
 # def train_controller():
 
 
 if __name__ == '__main__':
+    old_stdout = sys.stdout
+    sys.stdout = open("/home/ubuntu/GNN-AID/src/nas/out", "w")
+
     cora =  ("single-graph", "Planetoid", 'Cora')
     mutag = ('multiple-graphs', 'TUDataset', 'MUTAG')
 
     ss = SearchSpace(cora)
     nas = NasController(ss)
     trainer = Trainer(ss, nas)
-    nas.sample()
+    # nas.sample()
     trainer.train()
+
+    logger.info("best structure: %r", trainer.derive(10))
 
     # from torch_geometric.datasets import TUDataset
     # from torch_geometric.data import DataLoader
