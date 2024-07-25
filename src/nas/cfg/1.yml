@@ -1,0 +1,11 @@
+derive:
+  derive_from_history: false
+eval:
+  save_model_flag: false
+  steps: 2
+train:
+  derive_finaly: false
+  num_eras: 3
+  save_eras: 3
+train_controller:
+  epochs: 2

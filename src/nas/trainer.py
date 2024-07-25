@@ -36,9 +36,9 @@ def scale(value, last_k=10, scale_value=1):
 class TrainerArgs(BaseModel):
     class Train(BaseModel):
         # количество итераций обучения контроллера
-        num_epochs: int = 3
+        num_eras: int = 3
         # периодичность сохранения тренера
-        save_epoch: int = 2
+        save_eras: int = 2
         # флаг запуска выполнения derive после обучения
         derive_finaly: bool = False
     
@@ -73,19 +73,12 @@ class Trainer:
         self.controller_step = 0  # counter for controller
         self.controller_optim = torch.optim.Adam(self.nas.parameters(), lr=0.005)
 
-
-    def save(self):
-        fname = f"save/Trainer_{self.controller_step}.pkl"
-        with open(fname, "wb") as f:
-            pickle.dump(self, f)
-
-
     def train(self):
-        num_epochs = self.args.train.num_epochs
-        save_epoch = self.args.train.save_epoch
+        num_eras = self.args.train.num_eras
+        save_epoch = self.args.train.save_eras
         derive_finaly = self.args.train.derive_finaly
 
-        for epoch in range(num_epochs):
+        for epoch in range(num_eras):
             self.train_controller()
             # семплирует и измерять архитектуры, не понятно зачем
             # self.derive(derive_num_sample)
@@ -95,7 +88,7 @@ class Trainer:
         
         if derive_finaly:
             self.best_structure = self.derive()
-            logger.info("Trainer::train self.best_structure = %r", self.best_structure)
+            logger.info("train::self.best_structure = %r", self.best_structure)
         self.save()
         
     def eval(self, sampled_gnn):
@@ -144,8 +137,9 @@ class Trainer:
         metric = Metric("Accuracy", mask='val')
         metric_loc = gnn_model_manager.evaluate_model(
             gen_dataset=self.ss.dataset, metrics=[metric])
-        logger.info("Trainer::eval sampled_gnn = %r, metric_loc = %r",sampled_gnn, metric_loc)
-        return metric_loc['val']['Accuracy']
+        metric_val = metric_loc['val']['Accuracy']
+        logger.info("eval | (sampled_gnn, metric_val) = (%r, %r)", sampled_gnn, metric_val)
+        return metric_val
 
     def get_reward(self, sampled_gnns, entropies=None):
         """
@@ -185,7 +179,6 @@ class Trainer:
             rewards = self.get_reward(structures, 
                                       np_entropies)
             # сравнить аналогично с топом, прокидываем лосс
-
             reward_history.extend(rewards)
             entropy_history.extend(np_entropies)
 
@@ -225,3 +218,13 @@ class Trainer:
         rewards = self.get_reward(sampled_structures)
         min_i = np.argmax(rewards)
         return sampled_structures[min_i]
+
+    def save(self):
+        fname = f"save/Trainer_{self.controller_step}.pkl"
+        with open(fname, "wb") as f:
+            pickle.dump(self, f)
+    
+    @staticmethod
+    def load(fname):
+        with open(fname, "rb") as f:
+            return pickle.load(f)

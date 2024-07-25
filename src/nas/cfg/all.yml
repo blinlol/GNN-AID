@@ -1,0 +1,26 @@
+dataset:
+- single-graph
+- Planetoid
+- Cora
+derive_num: 10
+logfname: 25-05:50:51
+nas_args:
+  forward:
+    mode: train
+    softmax_temp: 5.0
+    tanh_c: 2.5
+  hidden_size: 100
+  reset:
+    init_range: 0.1
+trainer_args:
+  derive:
+    derive_from_history: false
+  eval:
+    save_model_flag: false
+    steps: 4
+  train:
+    derive_finaly: false
+    num_eras: 3
+    save_eras: 2
+  train_controller:
+    epochs: 3

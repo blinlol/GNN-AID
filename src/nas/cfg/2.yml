@@ -1,0 +1,7 @@
+forward:
+  mode: train
+  softmax_temp: 5.0
+  tanh_c: 2.5
+hidden_size: 100
+reset:
+  init_range: 0.1
