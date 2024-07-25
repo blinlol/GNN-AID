@@ -1,5 +1,5 @@
 import logging
-from enum import StrEnum
+from enum import StrEnum, IntEnum
 
 from collections import OrderedDict
 from copy import deepcopy
@@ -26,7 +26,6 @@ class GNN(StrEnum):
         return 'gnn'
 
 
-
 class Pool(StrEnum):
     add = 'global_add_pool'
     mean = 'global_mean_pool'
@@ -36,10 +35,16 @@ class Pool(StrEnum):
         return 'pool'
 
 
+class TrainEpochs(IntEnum):
+    @classmethod
+    def str(cls):
+        return "train_epochs"
+
+
 dict_layer_by_gnn = {
-        GNN.gcn: gcn_layer,
-        GNN.gin: gin_layer
-    }
+    GNN.gcn: gcn_layer,
+    GNN.gin: gin_layer
+}
 
 
 class SearchSpace:
@@ -57,6 +62,9 @@ class SearchSpace:
         })
         if self.graph_level:
             self.ss[Pool.str()] = [p.split('.')[-1] for p in Pool]
+            # self.ss[TrainEpochs.str()] = []
+        else:
+            self.ss[TrainEpochs.str()] = list(range(100, 251, 25))
 
     @property
     def dict(self) -> OrderedDict:
@@ -65,8 +73,8 @@ class SearchSpace:
     @property
     def list(self) -> list[str]:
         if self.graph_level:
-            return [GNN.str(), GNN.str(), Pool.str()]
-        return [GNN.str(), GNN.str()]
+            return [GNN.str(), GNN.str(), Pool.str(), TrainEpochs.str()]
+        return [GNN.str(), GNN.str(), TrainEpochs.str()]
     
     def ind_by_name(self, action_name: str) -> int:
         for i, key in enumerate(self.ss):
@@ -145,3 +153,6 @@ class SearchSpace:
         if self.graph_level:
             return self.graph_task_structure(sampled_structure, num_feat, num_classes)
         return self.node_task_structure(sampled_structure, num_feat, num_classes)
+
+    def get_train_epochs(self, sampled_gnn):
+        return sampled_gnn[self.list.index(TrainEpochs.str())]

@@ -2,6 +2,7 @@ import logging
 import numpy as np
 import pickle
 import torch
+import time
 
 from pydantic import BaseModel, Field
 
@@ -44,7 +45,7 @@ class TrainerArgs(BaseModel):
     
     class Eval(BaseModel):
         # количество эпох обучения модели
-        steps: int = 4
+        # steps: int = 4
         # передается в train_model, хз зачем
         save_model_flag: bool = False
     
@@ -75,28 +76,33 @@ class Trainer:
 
     def train(self):
         num_eras = self.args.train.num_eras
-        save_epoch = self.args.train.save_eras
+        save_eras = self.args.train.save_eras
         derive_finaly = self.args.train.derive_finaly
 
-        for epoch in range(num_eras):
+        start_time = time.time()
+
+        for era in range(num_eras):
+            era_time = time.time()
             self.train_controller()
+            logger.info("train | %r era_time %r", era, time.time() - era_time)
+
             # семплирует и измерять архитектуры, не понятно зачем
             # self.derive(derive_num_sample)
             # сохраняет если нужно
-            if epoch % save_epoch == 0:
+            if era % save_eras == 0:
                 self.save()
         
         if derive_finaly:
             self.best_structure = self.derive()
-            logger.info("train::self.best_structure = %r", self.best_structure)
+            logger.info("train | self.best_structure = %r", self.best_structure)
         self.save()
+        logger.info("train | train_time %r", time.time() - start_time)
         
     def eval(self, sampled_gnn):
         """обучает переданную архитектуру и возвращает скор на валидации
         """
         # TODO: оптимизировать вызовы конструкторов
 
-        steps = self.args.eval.steps
         save_model_flag = self.args.eval.save_model_flag
 
         manager_config = ModelManagerConfig(**{
@@ -109,6 +115,8 @@ class Trainer:
         )
 
         gnn = self.ss.create_gnn_structure(sampled_gnn)
+        steps = self.ss.get_train_epochs(sampled_gnn)
+
         gnn = FrameworkGNNConstructor(
                 model_config=ModelConfig(
                     structure=ModelStructureConfig(gnn)

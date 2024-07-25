@@ -59,7 +59,7 @@ old_stdout = sys.stdout
 sys.stdout = open("/home/ubuntu/GNN-AID/src/nas/logs/out", "w")
 
 cfg_dir = "/home/ubuntu/GNN-AID/src/nas/cfg/"
-cfgs = [cfg_dir + 'all.yml']
+cfgs = [cfg_dir + '1.yml']
 a = ExperimentArgs(dataset=Datasets.cora)
 for cfg_file in cfgs:
     experiment(cfg_file)
