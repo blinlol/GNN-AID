@@ -11,6 +11,8 @@ from graphnas.gnn_model_manager import CitationGNNManager, evaluate
 from graphnas_variants.macro_graphnas.pyg.pyg_gnn import GraphNet
 from graphnas.utils.label_split import fix_size_split
 
+from base.datasets_processing import DatasetManager
+
 
 def load_data(dataset="Cora", supervised=False, full_data=True):
     '''
@@ -20,17 +22,38 @@ def load_data(dataset="Cora", supervised=False, full_data=True):
     :return:
     '''
     path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
+
+    # cora = Planetoid(path, 'Cora', transform=T.NormalizeFeatures())
+    # mutag = DatasetManager.get_by_full_name(
+    #     ('multiple-graphs', 'TUDataset', 'MUTAG'),
+    #     dataset_attack_type='original',
+    #     dataset_ver_ind=0
+    # )
+    # mutag[0] - ptgdataset
+    # ptgdataset.data - data from TUDataset
+    # has masks, 
+    
     if dataset in ["CS", "Physics"]:
         dataset = Coauthor(path, dataset, T.NormalizeFeatures())
     elif dataset in ["Computers", "Photo"]:
         dataset = Amazon(path, dataset, T.NormalizeFeatures())
     elif dataset in ["Cora", "Citeseer", "Pubmed"]:
         dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
+        data = dataset[0]
     elif dataset in ["MUTAG"]:
-        dataset = TUDataset(path, dataset, T.NormalizeFeatures())
+        # dataset = TUDataset(path, dataset, T.NormalizeFeatures())
+        ptg, _, _ = DatasetManager.get_by_full_name(
+            ('multiple-graphs', 'TUDataset', 'MUTAG'),
+            dataset_attack_type='original',
+            dataset_ver_ind=0
+        )
+        data = ptg.data
+        data.train_mask = ptg.train_mask
+        data.test_mask = ptg.test_mask
+        data.val_mask = ptg.val_mask
     else:
         raise ValueError()
-    data = dataset[0]
+    # data = dataset[0]
     if supervised:
         if full_data:
             data.train_mask = torch.zeros(data.num_nodes, dtype=torch.uint8)

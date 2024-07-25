@@ -76,6 +76,8 @@ def register_default_args(parser):
     parser.add_argument('--supervised', type=bool, default=False)
     parser.add_argument('--submanager_log_file', type=str, default=f"sub_manager_logger_file_{time.time()}.txt")
 
+    parser.add_argument('--graph_task', action="store_true")
+
 
 def main(args):  # pylint:disable=redefined-outer-name
     if args.cuda and not torch.cuda.is_available():  # cuda is not available
@@ -90,7 +92,7 @@ def main(args):  # pylint:disable=redefined-outer-name
     utils.makedirs(args.dataset)
 
     trnr = trainer.Trainer(args)
-    # trnr.load_model()sld;ldcmsl
+    # trnr.load_model()
 
     if args.mode == 'train':
         trnr.train()

@@ -2,9 +2,12 @@ from graphnas_variants.macro_graphnas.pyg.pyg_gnn_model_manager import GeoCitati
 from graphnas_variants.micro_graphnas.micro_gnn import MicroGNN
 import torch
 import os.path as osp
-from torch_geometric.datasets import Planetoid, Coauthor, Amazon
+from torch_geometric.datasets import Planetoid, Coauthor, Amazon, TUDataset
 import torch_geometric.transforms as T
 from graphnas.utils.label_split import fix_size_split
+
+from base.datasets_processing import DatasetManager
+
 
 
 def load_data(dataset="Cora", supervised=False, full_data=True):
@@ -20,8 +23,28 @@ def load_data(dataset="Cora", supervised=False, full_data=True):
     elif dataset in ["Computers", "Photo"]:
         dataset = Amazon(path,dataset, T.NormalizeFeatures())
     elif dataset in ["Cora", "Citeseer", "Pubmed"]:
-        dataset = Planetoid(path, dataset, T.NormalizeFeatures())
-    data = dataset[0]
+        # dataset = DatasetManager.get_by_full_name(
+        #     ("single-graph", "Planetoid", dataset),
+        #     dataset_attack_type="original",
+        #     dataset_ver_ind=0
+        # )
+        # data = dataset[1]
+        dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
+        data = dataset[0]
+    elif dataset in ["MUTAG"]:
+        # dataset = DatasetManager.get_by_full_name(
+        #     ("multiple-graphs", "TUDataset", dataset),
+        #     dataset_attack_type="original",
+        #     dataset_ver_ind=0
+        # )
+        # data = dataset[1]
+        # data.train_mask = dataset[0].train_mask
+        # data.test_mask = dataset[0].test_mask
+        dataset = TUDataset(path, dataset, transform=T.NormalizeFeatures())
+        data = dataset
+        data.train_mask = torch.BoolTensor([True] * (len(dataset) - 20) + [False] * 20)
+        data.val_mask = torch.BoolTensor([False] * (len(dataset) - 20) + [True] * 10 + [False] * 10)
+        data.test_mask = torch.BoolTensor([False] * (len(dataset) - 20) + [False] * 10 + [True] * 10)
     if supervised:
         if full_data:
             data.train_mask = torch.zeros(data.num_nodes, dtype=torch.uint8)
@@ -47,11 +70,11 @@ class MicroCitationManager(GeoCitationManager):
         if hasattr(args, "supervised")  :
             self.data = load_data(args.dataset, args.supervised)
             device = torch.device('cuda' if args.cuda else 'cpu')
-            self.data.to(device)
+            # self.data.to(device)
 
     def build_gnn(self, actions):
         model = MicroGNN(actions, self.in_feats, self.n_classes, layers=self.args.layers_of_child_model, num_hidden=self.args.num_hidden,
-                         dropout=self.args.in_drop)
+                         dropout=self.args.in_drop, graph_task=self.args.graph_task)
         return model
 
     def train(self, actions=None, format="micro"):

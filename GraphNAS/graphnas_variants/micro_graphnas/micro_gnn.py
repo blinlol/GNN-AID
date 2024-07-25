@@ -2,11 +2,19 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from torch_geometric.nn.pool import global_add_pool
+
 from graphnas_variants.micro_graphnas.micro_search_space import gnn_map, act_map
 
 
+class AddPooling(nn.Module):
+    def forward(self, x):
+        return global_add_pool(x, None)
+
+
 class MicroGNN(nn.Module):
-    def __init__(self, action, num_feat, num_classes, num_hidden, dropout=0.6, layers=2, stem_multiplier=2, bias=True):
+    def __init__(self, action, num_feat, num_classes, num_hidden, dropout=0.6, layers=2, stem_multiplier=2, bias=True,
+                 graph_task=False):
         super(MicroGNN, self).__init__()
         self._layers = layers
         self.dropout = dropout
@@ -17,9 +25,21 @@ class MicroGNN(nn.Module):
             self.cells += [cell]
             his_dim = cur_dim
             cur_dim = cell.multiplier * out_dim if action[-1] == "concat" else out_dim
+        
+        if graph_task:
+            # self.classifier = nn.Linear(cur_dim, num_classes)
 
-        self.classifier = nn.Linear(cur_dim, num_classes)
-        pass
+
+# посмотреть параметры и размерности
+            self.classifier = nn.Sequential(
+                AddPooling(),
+                # nn.AvgPool1d(),
+                nn.Linear(cur_dim, num_feat),
+                nn.ReLU(),
+                nn.Linear(num_feat, num_classes)
+            )
+        else:
+            self.classifier = nn.Linear(cur_dim, num_classes)
 
     def forward(self, x, edge_index):
         x = F.dropout(x, p=self.dropout, training=self.training)
@@ -27,6 +47,9 @@ class MicroGNN(nn.Module):
         for i, cell in enumerate(self.cells):
             s0, s1 = s1, cell(s0, s1, edge_index, self.dropout)
         out = s1
+        # if graph_task:
+        #     mckdml
+        # else:
         logits = self.classifier(out.view(out.size(0), -1))
         return logits
 

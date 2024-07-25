@@ -448,4 +448,6 @@ class Trainer(object):
         """if actions is None then train with best"""
         if actions is None:
             actions = self.best_actions
+        if isinstance(actions, dict):
+            actions = actions['action']
         return self.submodel_manager.build_gnn(actions=actions), actions

@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from torch.nn import Module
+from torch.nn import Module, ReLU, Linear, Sequential
 from torch_geometric.nn.conv import *
 
 gnn_list = [
@@ -16,6 +16,7 @@ gnn_list = [
     "sg",  # simplifying gcn
     "linear",  # skip connection
     "zero",  # skip connection
+    "gin",
 ]
 act_list = [
     # "sigmoid", "tanh", "relu", "linear",
@@ -80,6 +81,14 @@ def gnn_map(gnn_name, in_dim, out_dim, concat=False, bias=True) -> Module:
         return LinearConv(in_dim, out_dim, bias=bias)
     elif gnn_name == "zero":
         return ZeroConv(in_dim, out_dim, bias=bias)
+    elif gnn_name == "gin":
+        nn = Sequential(
+            Linear(in_dim, out_dim, bias),
+            ReLU(),
+            Linear(in_dim, out_dim, bias)
+        )
+
+        return GINConv(nn, in_channels=in_dim, out_channels=out_dim, bias=bias)
 
 
 class LinearConv(Module):
