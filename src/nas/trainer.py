@@ -21,17 +21,7 @@ from nas.controller import NasController
 
 
 logger = logging.getLogger(__name__)
-history = []
 
-
-def scale(value, last_k=10, scale_value=1):
-    '''
-    scale value into [-scale_value, scale_value], according last_k history
-    '''
-    max_reward = np.max(history[-last_k:])
-    if max_reward == 0:
-        return value
-    return scale_value / max_reward * value
 
 
 class TrainerArgs(BaseModel):
@@ -42,17 +32,17 @@ class TrainerArgs(BaseModel):
         save_eras: int = 2
         # флаг запуска выполнения derive после обучения
         derive_finaly: bool = False
-    
+
     class Eval(BaseModel):
         # количество эпох обучения модели
         # steps: int = 4
         # передается в train_model, хз зачем
         save_model_flag: bool = False
-    
+
     class TrainController(BaseModel):
         # количество эпох обучения контроллера на каждой итерации
         epochs: int = 3
-    
+
     class Derive(BaseModel):
         # нереализованная функциональность
         derive_from_history: bool = False
@@ -71,8 +61,9 @@ class Trainer:
         self.args = args
 
         # move optimizer to contoller?
-        self.controller_step = 0  # counter for controller
+        self.nas.num_steps = 0  # counter for controller
         self.controller_optim = torch.optim.Adam(self.nas.parameters(), lr=0.005)
+        self.history = []
 
     def train(self):
         num_eras = self.args.train.num_eras
@@ -196,8 +187,8 @@ class Trainer:
                 decay = 0.95
                 baseline = decay * baseline + (1 - decay) * rewards
             adv = rewards - baseline
-            history.append(adv)
-            adv = scale(adv, scale_value=0.5)
+            self.history.append(adv)
+            adv = self.scale(adv, scale_value=0.5)
             adv_history.extend(adv)
 
             adv = get_variable(adv, requires_grad=False)
@@ -212,7 +203,7 @@ class Trainer:
 
             total_loss += to_item(loss.data)
 
-            self.controller_step += 1
+            self.nas.num_steps += 1
 
     def derive(self, sample_num=None):
         """возвращает лучшую архитектуру"""
@@ -228,7 +219,7 @@ class Trainer:
         return sampled_structures[min_i]
 
     def save(self):
-        fname = f"save/Trainer_{self.controller_step}.pkl"
+        fname = f"save/Trainer_{self.nas.num_steps}.pkl"
         with open(fname, "wb") as f:
             pickle.dump(self, f)
     
@@ -236,3 +227,13 @@ class Trainer:
     def load(fname):
         with open(fname, "rb") as f:
             return pickle.load(f)
+
+
+    def scale(self, value, last_k=10, scale_value=1):
+        '''
+        scale value into [-scale_value, scale_value], according last_k history
+        '''
+        max_reward = np.max(self.history[-last_k:])
+        if max_reward == 0:
+            return value
+        return scale_value / max_reward * value

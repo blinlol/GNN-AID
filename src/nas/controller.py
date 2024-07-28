@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from pydantic import BaseModel, Field
 
-from nas.search_space import SearchSpace
+from nas.search_space import SearchSpace, SSType, GNN
 from nas.misc import get_variable
 
 
@@ -27,6 +27,9 @@ class ControllerArgs(BaseModel):
     hidden_size: int = 100
     reset: Reset = Field(default_factory=Reset)
     forward: Forward = Field(default_factory=Forward)
+    # количество эпох контроллера, после которого выравнивать вероятности методоа
+    # (работает только при условии, что SearchSpace.args.type == dynamic_prob)
+    dynamic_nas_steps: int = -1
 
 
 class NasController(torch.nn.Module):
@@ -35,6 +38,10 @@ class NasController(torch.nn.Module):
 
         self.ss = search_space
         self.args = args
+        self.num_steps = 0
+
+        if self.ss.args.type == SSType.dynamic_prob:
+            assert self.args.dynamic_nas_steps > 0
 
         self.num_tokens = []
         for key, val in self.ss.dict.items():
@@ -96,6 +103,13 @@ class NasController(torch.nn.Module):
             decoder_i = self.ss.ind_by_name(action_name)
 
             logits, hidden = self.forward(inputs, hidden, action_name)
+            if action_name == GNN.str() and \
+                    self.ss.args.type == SSType.dynamic_prob and self.num_steps > self.args.dynamic_nas_steps:
+                indexes = self.ss.duplicated_gnns_indexes
+                for i in indexes:
+                    # будет ли это верно математически????
+                    # правильно ли???
+                    logits[0][i] = 0
             probs = F.softmax(logits, dim=-1)
             log_prob = F.log_softmax(logits, dim=-1)
             entropy = -(log_prob * probs).sum(1, keepdim=False)

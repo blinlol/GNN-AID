@@ -1,10 +1,11 @@
 dataset:
-- single-graph
-- Planetoid
-- Cora
+- multiple-graphs
+- TUDataset
+- BZR
 derive_num: 10
-logfname: 25-05:50:51
+logfname: 28-14:02:54
 nas_args:
+  dynamic_nas_steps: -1
   forward:
     mode: train
     softmax_temp: 5.0
@@ -12,12 +13,14 @@ nas_args:
   hidden_size: 100
   reset:
     init_range: 0.1
+ss_args:
+  prob_scale: 1
+  type: basic
 trainer_args:
   derive:
     derive_from_history: false
   eval:
     save_model_flag: false
-    steps: 4
   train:
     derive_finaly: false
     num_eras: 3

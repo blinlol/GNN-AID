@@ -5,7 +5,6 @@ from copy import deepcopy
 
 
 
-#TODO: use enum for search space keys, vals (pydantic)
 gcn_layer = {
     'label': 'n',
     'layer': {
@@ -75,15 +74,6 @@ gin_layer = {
     },
     'connections': []
 }
-connection = {
-    'into_layer': None,  # index of the last layer
-    'connection_kwargs': {
-        'pool': {
-            'pool_type': 'global_add_pool'
-        },
-        'aggregation_type': 'cat'
-    }
-}
 lin_layer = {
     'label': 'g',
     'layer': {
@@ -97,6 +87,137 @@ lin_layer = {
         'activation_name': 'ReLU',
         'activation_kwargs': None,
     },
+}
+sage_layer = {
+    'label': 'n',
+    'layer': {
+        'layer_name': 'SAGEConv',
+        'layer_kwargs': {
+            'in_channels': None,
+            'out_channels': 16,
+            'aggr': 'mean',
+            'normalize': False,
+            'root_weight': True,
+            'bias': True
+        }
+    },
+    'activation': {
+        'activation_name': 'ReLU',
+        'activation_kwargs': None
+    },
+    'connections': []
+}
+gat_layer = {
+    'label': 'n',
+    'layer': {
+        'layer_name': 'GATConv',
+        'layer_kwargs': {
+            'in_channels': None,
+            'out_channels': 16,
+            'heads': 1,
+            'concat': True,
+            'negative_slope': 0.2,
+            'dropout': 0,
+            'add_self_loops': True,
+            'edge_dim': None,
+            'fill_value': 'mean',
+            'bias': True
+        }
+    },
+    'activation': {
+        'activation_name': 'ReLU',
+        'activation_kwargs': None
+    },
+    'connections': []
+}
+sg_layer = {
+    'label': 'n',
+    'layer': {
+        'layer_name': 'SGConv',
+        'layer_kwargs': {
+            'in_channels': None,
+            'out_channels': 16,
+            'K': 1,
+            'cashed': True,
+            'add_self_loops': True,
+            'bias': True
+        }
+    },
+    'activation': {
+        'activation_name': 'ReLU',
+        'activation_kwargs': None
+    },
+    'connections': []
+}
+ssg_layer = {
+    'label': 'n',
+    'layer': {
+        'layer_name': 'SSGConv',
+        'layer_kwargs': {
+            'in_channels': None,
+            'out_channels': 16,
+            'alpha': 0.1,
+            'K': 1,
+            'cashed': True,
+            'add_self_loops': True,
+            'bias': True
+        }
+    },
+    'activation': {
+        'activation_name': 'ReLU',
+        'activation_kwargs': None
+    },
+    'connections': []
+}
+tag_layer = {
+    'label': 'n',
+    'layer': {
+        'layer_name': 'TAGConv',
+        'layer_kwargs': {
+            'in_channels': None,
+            'out_channels': 16,
+            'K': 3,
+            'normalize': False,
+            'bias': True
+        }
+    },
+    'activation': {
+        'activation_name': 'ReLU',
+        'activation_kwargs': None
+    },
+    'connections': []
+}
+gmm_layer = {
+    'label': 'n',
+    'layer': {
+        'layer_name': 'GMM',
+        'layer_kwargs': {
+            'in_channels': None,
+            'out_channels': 16,
+            'dim': 1,
+            'kernel_size': 1,
+            'cached': False,
+            'separate_gaussians': False,
+            'aggr': 'mean',
+            'root_weight': True,
+            'bias': True
+        }
+    },
+    'activation': {
+        'activation_name': 'ReLU',
+        'activation_kwargs': None
+    },
+    'connections': []
+}
+
+connection = {
+    'into_layer': None,  # index of the last layer
+    'connection_kwargs': {
+        'pool': {
+            'pool_type': 'global_add_pool'
+        },
+        'aggregation_type': 'cat'
+    }
 }
 
 

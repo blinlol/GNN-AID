@@ -1,15 +1,15 @@
 import logging
 from enum import StrEnum, IntEnum
+from pydantic import BaseModel
 
 from collections import OrderedDict
 from copy import deepcopy
 
 from base.datasets_processing import DatasetManager
 from nas.misc import (
-    gcn_layer,
-    gin_layer,
-    lin_layer,
-    connection,
+    gcn_layer, gin_layer, sg_layer, gat_layer,
+    gmm_layer, ssg_layer, tag_layer, sage_layer,
+    connection, lin_layer,
     change_in_out
 )
 
@@ -20,15 +20,34 @@ logger = logging.getLogger(__name__)
 class GNN(StrEnum):
     gcn = 'gcn'
     gin = 'gin'
+    sg = 'sg'
+    ssg = 'ssg'
+    gat = 'gat'
+    gmm = 'gmm'
+    tag = 'tag'
+    sage = 'sage'
 
     @classmethod
     def str(cls):
         return 'gnn'
 
 
+dict_layer_by_gnn = {
+    GNN.gcn: gcn_layer,
+    GNN.gin: gin_layer,
+    GNN.gat: gat_layer,
+    GNN.sg: sg_layer,
+    GNN.ssg: ssg_layer,
+    GNN.gmm: gmm_layer,
+    GNN.tag: tag_layer,
+    GNN.sage: sage_layer,
+}
+
+
 class Pool(StrEnum):
     add = 'global_add_pool'
     mean = 'global_mean_pool'
+    max = 'global_max_pool'
 
     @classmethod
     def str(cls):
@@ -41,14 +60,23 @@ class TrainEpochs(IntEnum):
         return "train_epochs"
 
 
-dict_layer_by_gnn = {
-    GNN.gcn: gcn_layer,
-    GNN.gin: gin_layer
-}
+class SSType(StrEnum):
+    # equal probabilities for all gnns
+    basic = 'basic'
+    # фиксированная повышенная вероятность для целевых методов
+    fixed_prob = 'fixed_prob'
+    # со временем вероятность выравнивается
+    dynamic_prob = 'dynamic_prob'
+
+
+class SearchSpaceArgs(BaseModel):
+    type: SSType = SSType.basic
+    # во сколько раз увеличивать вероятность выпадения целевых методов
+    prob_scale: int = 1
 
 
 class SearchSpace:
-    def __init__(self, dataset_full_name):
+    def __init__(self, dataset_full_name, args: SearchSpaceArgs):
         self.dataset, self.data, self.results_dataset_path = DatasetManager.get_by_full_name(
             full_name=dataset_full_name,
             dataset_attack_type='original',
@@ -56,15 +84,38 @@ class SearchSpace:
         )
         self.dataset.train_test_split(percent_train_class=0.6)
         self.graph_level = self.dataset.is_multi()
+        self.args = args
 
-        self.ss = OrderedDict({
-            GNN.str(): [g.split('.')[-1] for g in GNN]
-        })
+        # Индексы в self.ss['gnn'], которые соответствуют повторам методов
+        self.duplicated_gnns_indexes = []
+
         if self.graph_level:
-            self.ss[Pool.str()] = [p.split('.')[-1] for p in Pool]
-            # self.ss[TrainEpochs.str()] = []
+            self.ss = OrderedDict({
+                GNN.str(): [g.value for g in GNN],
+                Pool.str(): [p.value for p in Pool],
+                # TrainEpochs.str(): list(range(3000, 8001, 500))
+                TrainEpochs.str(): list(range(1, 2))
+            })
+            if self.args.type in (SSType.fixed_prob, SSType.dynamic_prob):
+                scale = self.args.prob_scale - 1
+                self.ss[GNN.str()].extend([GNN.gcn.value] * scale)
+                self.ss[GNN.str()].extend([GNN.gin.value] * scale)
+
+                l = len(self.ss[GNN.str()])
+                self.duplicated_gnns_indexes.extend(range(l - 2 * scale, l))
         else:
-            self.ss[TrainEpochs.str()] = list(range(100, 251, 25))
+            self.ss = OrderedDict({
+                GNN.str(): [g.value for g in GNN],
+                # TrainEpochs.str(): list(range(100, 221, 20))
+                TrainEpochs.str(): list(range(1, 2))
+            })
+            if self.args.type in (SSType.fixed_prob, SSType.dynamic_prob):
+                scale = self.args.prob_scale - 1
+                self.ss[GNN.str()].extend([GNN.gcn.value] * scale)
+                self.ss[GNN.str()].extend([GNN.gmm.value] * scale)
+
+                l = len(self.ss[GNN.str()])
+                self.duplicated_gnns_indexes.extend(range(l - 2 * scale, l))
 
     @property
     def dict(self) -> OrderedDict:
@@ -75,7 +126,7 @@ class SearchSpace:
         if self.graph_level:
             return [GNN.str(), GNN.str(), Pool.str(), TrainEpochs.str()]
         return [GNN.str(), GNN.str(), TrainEpochs.str()]
-    
+
     def ind_by_name(self, action_name: str) -> int:
         for i, key in enumerate(self.ss):
             if key == action_name:
