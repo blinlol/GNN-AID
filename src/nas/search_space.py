@@ -86,6 +86,7 @@ class SearchSpace:
         self.graph_level = self.dataset.is_multi()
         self.args = args
 
+        self.main_gnns_indexes = []
         # Индексы в self.ss['gnn'], которые соответствуют повторам методов
         self.duplicated_gnns_indexes = []
 
@@ -93,9 +94,10 @@ class SearchSpace:
             self.ss = OrderedDict({
                 GNN.str(): [g.value for g in GNN],
                 Pool.str(): [p.value for p in Pool],
-                # TrainEpochs.str(): list(range(3000, 8001, 500))
-                TrainEpochs.str(): list(range(1, 2))
+                TrainEpochs.str(): list(range(3000, 8001, 500))
+                # TrainEpochs.str(): list(range(1, 2))
             })
+            self.main_gnns_indexes.extend(range(len(self.ss[GNN.str()])))
             if self.args.type in (SSType.fixed_prob, SSType.dynamic_prob):
                 scale = self.args.prob_scale - 1
                 self.ss[GNN.str()].extend([GNN.gcn.value] * scale)
@@ -106,9 +108,10 @@ class SearchSpace:
         else:
             self.ss = OrderedDict({
                 GNN.str(): [g.value for g in GNN],
-                # TrainEpochs.str(): list(range(100, 221, 20))
-                TrainEpochs.str(): list(range(1, 2))
+                TrainEpochs.str(): list(range(100, 221, 20))
+                # TrainEpochs.str(): list(range(1, 2))
             })
+            self.main_gnns_indexes.extend(range(len(self.ss[GNN.str()])))
             if self.args.type in (SSType.fixed_prob, SSType.dynamic_prob):
                 scale = self.args.prob_scale - 1
                 self.ss[GNN.str()].extend([GNN.gcn.value] * scale)
