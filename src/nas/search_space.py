@@ -60,6 +60,12 @@ class TrainEpochs(IntEnum):
         return "train_epochs"
 
 
+class NumLayers(IntEnum):
+    @classmethod
+    def str(cls):
+        return "num_layers"
+
+
 class SSType(StrEnum):
     # equal probabilities for all gnns
     basic = 'basic'
@@ -74,6 +80,8 @@ class SearchSpaceArgs(BaseModel):
     # во сколько раз увеличивать вероятность выпадения целевых методов
     prob_scale: int = 1
     debug: bool = False
+    # составлять ли архитектуры состоящие из разных методов 
+    with_combinations: bool = True
 
 
 class SearchSpace:
@@ -95,7 +103,8 @@ class SearchSpace:
             self.ss = OrderedDict({
                 GNN.str(): [g.value for g in GNN],
                 Pool.str(): [p.value for p in Pool],
-                TrainEpochs.str(): list(range(3000, 8001, 500))
+                TrainEpochs.str(): list(range(3000, 8001, 500)),
+                NumLayers.str(): [2],
             })
             self.main_gnns_indexes.extend(range(len(self.ss[GNN.str()])))
             if self.args.type in (SSType.fixed_prob, SSType.dynamic_prob):
@@ -108,7 +117,8 @@ class SearchSpace:
         else:
             self.ss = OrderedDict({
                 GNN.str(): [g.value for g in GNN],
-                TrainEpochs.str(): list(range(100, 221, 20))
+                TrainEpochs.str(): list(range(100, 221, 20)),
+                NumLayers.str(): [2],
             })
             self.main_gnns_indexes.extend(range(len(self.ss[GNN.str()])))
             if self.args.type in (SSType.fixed_prob, SSType.dynamic_prob):
@@ -128,9 +138,13 @@ class SearchSpace:
 
     @property
     def list(self) -> list[str]:
+        num_gnns = 1
+        if self.args.with_combinations:
+            num_gnns = 2
+
         if self.graph_level:
-            return [GNN.str(), GNN.str(), Pool.str(), TrainEpochs.str()]
-        return [GNN.str(), GNN.str(), TrainEpochs.str()]
+            return [GNN.str()] * num_gnns + [NumLayers.str(), Pool.str(), TrainEpochs.str()]
+        return [GNN.str()] * num_gnns + [NumLayers.str(), TrainEpochs.str()]
 
     def ind_by_name(self, action_name: str) -> int:
         for i, key in enumerate(self.ss):
@@ -205,6 +219,15 @@ class SearchSpace:
                 sampled_structure[key] = sampled_structure.get(key, []) + [val]
             else:
                 sampled_structure[key] = val
+
+        if not self.args.with_combinations:
+            # семплирован один метод, нужно его размножить
+            gnn = sampled_structure[GNN.str()][0]
+            num = sampled_structure[NumLayers.str()]
+            sampled_structure[GNN.str()] = [gnn] * num
+
+        # поддержка других вариантов нереализованна
+        assert sampled_structure[NumLayers.str()] == 2
 
         if self.graph_level:
             return self.graph_task_structure(sampled_structure, num_feat, num_classes)
