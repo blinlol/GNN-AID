@@ -73,6 +73,7 @@ class SearchSpaceArgs(BaseModel):
     type: SSType = SSType.basic
     # во сколько раз увеличивать вероятность выпадения целевых методов
     prob_scale: int = 1
+    debug: bool = False
 
 
 class SearchSpace:
@@ -95,7 +96,6 @@ class SearchSpace:
                 GNN.str(): [g.value for g in GNN],
                 Pool.str(): [p.value for p in Pool],
                 TrainEpochs.str(): list(range(3000, 8001, 500))
-                # TrainEpochs.str(): list(range(1, 2))
             })
             self.main_gnns_indexes.extend(range(len(self.ss[GNN.str()])))
             if self.args.type in (SSType.fixed_prob, SSType.dynamic_prob):
@@ -109,7 +109,6 @@ class SearchSpace:
             self.ss = OrderedDict({
                 GNN.str(): [g.value for g in GNN],
                 TrainEpochs.str(): list(range(100, 221, 20))
-                # TrainEpochs.str(): list(range(1, 2))
             })
             self.main_gnns_indexes.extend(range(len(self.ss[GNN.str()])))
             if self.args.type in (SSType.fixed_prob, SSType.dynamic_prob):
@@ -119,6 +118,9 @@ class SearchSpace:
 
                 l = len(self.ss[GNN.str()])
                 self.duplicated_gnns_indexes.extend(range(l - 2 * scale, l))
+        
+        if self.args.debug:
+            self.ss[TrainEpochs.str()] = [1]
 
     @property
     def dict(self) -> OrderedDict:
