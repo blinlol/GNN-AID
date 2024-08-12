@@ -54,8 +54,8 @@ class NasController(torch.nn.Module):
         self.num_steps = 0
 
         if self.ss.args.type == SSType.dynamic_prob:
-            assert self.args.dynamic_nas_steps > 0 and \
-                    self.args.dynamic_behaviour != DynamicBehaviourType.undefined
+            assert self.args.dynamic_nas_steps > 0
+            assert self.args.dynamic_behaviour != DynamicBehaviourType.undefined
 
         self.num_tokens = []
         for key, val in self.ss.dict.items():
@@ -128,7 +128,7 @@ class NasController(torch.nn.Module):
                         # 1 меняем логиты на минимум среди актуальной части, 
                         # тогда оба софтмакса будут выдавать минимальную вероятность на дублированные гнн
                         min_logit = logits[0][main_indexes].min()
-                        for i in range(dup_indexes):
+                        for i in dup_indexes:
                             logits[0][i] = min_logit
                         probs = F.softmax(logits, dim=-1)
                         log_prob = F.log_softmax(logits, dim=-1)
@@ -138,7 +138,7 @@ class NasController(torch.nn.Module):
                         # тогда обучение не будут затрагиваться
                         log_prob = F.log_softmax(logits, dim=-1)
                         softmax_logits = F.softmax(logits, dim=-1)
-                        for i in range(dup_indexes):
+                        for i in dup_indexes:
                             softmax_logits[0][i] = 0
                         probs = F.softmax(softmax_logits, dim=-1)
                     case _:

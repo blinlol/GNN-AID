@@ -4,7 +4,7 @@ import sys
 import datetime as dt
 from enum import Enum
 from pydantic import BaseModel, Field
-from pydantic_yaml import parse_yaml_file_as, to_yaml_file
+from pydantic_yaml import parse_yaml_file_as, to_yaml_file, to_yaml_str
 
 from nas.controller import NasController, ControllerArgs
 from nas.search_space import SearchSpace, SearchSpaceArgs
@@ -44,6 +44,7 @@ def set_logfile(fname):
 def experiment(cfg_file):
     args = parse_yaml_file_as(ExperimentArgs, cfg_file)
     set_logfile(args.logfname)
+    logger.info(to_yaml_str(args))
 
     ss = SearchSpace(args.dataset.value, args.ss_args)
     nas = NasController(ss, args.nas_args)
@@ -59,12 +60,22 @@ warnings.filterwarnings("ignore")
 old_stdout = sys.stdout
 sys.stdout = open("/home/ubuntu/GNN-AID/src/nas/logs/out", "w")
 
+logger = logging.getLogger(__name__)
+
 cfg_dir = "/home/ubuntu/GNN-AID/src/nas/cfg/"
 cfgs = [
     cfg_dir + '1.yml',
-    cfg_dir + '2.yml'
+    cfg_dir + '2.yml',
+    cfg_dir + '3.yml',
+    cfg_dir + '4.yml',
+    cfg_dir + '5.yml',
+    cfg_dir + '6.yml',
 ]
 for cfg_file in cfgs:
-    experiment(cfg_file)
+    try:
+        experiment(cfg_file)
+    except Exception as e:
+        logger.error("cfg_file = %r\n%s", cfg_file, e)
 
 # to_yaml_file("cfg/all.yml", ExperimentArgs(dataset=Datasets.bzr))
+# experiment(cfg_dir + "all.yml")

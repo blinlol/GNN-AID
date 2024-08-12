@@ -3,9 +3,10 @@ dataset:
 - TUDataset
 - BZR
 derive_num: 10
-logfname: 28-14:02:54
+logfname: pupupu
 nas_args:
-  dynamic_nas_steps: -1
+  dynamic_behaviour: probs_only
+  dynamic_nas_steps: 7
   forward:
     mode: train
     softmax_temp: 5.0
@@ -14,8 +15,10 @@ nas_args:
   reset:
     init_range: 0.1
 ss_args:
-  prob_scale: 1
-  type: basic
+  debug: true
+  prob_scale: 4
+  type: dynamic_prob
+  with_combinations: true
 trainer_args:
   derive:
     derive_from_history: false
@@ -24,6 +27,6 @@ trainer_args:
   train:
     derive_finaly: false
     num_eras: 3
-    save_eras: 2
+    save_eras: 4
   train_controller:
-    epochs: 3
+    epochs: 5

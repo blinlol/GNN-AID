@@ -53,3 +53,4 @@ tmp.py
 src/nas/save/
 GraphNAS/Citeseer/
 GraphNAS/Cora/
+nohup.out
