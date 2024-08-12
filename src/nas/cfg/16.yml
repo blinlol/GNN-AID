@@ -1,12 +1,12 @@
 dataset:
-- single-graph
-- Planetoid
-- Cora
+- multiple-graphs
+- TUDataset
+- BZR
 derive_num: 30
-logfname: 'cora_basic_combinations.log'
+logfname: 'bzr_dynamic-probsonly_no-combinations.log'
 nas_args:
-  dynamic_behaviour: undefined
-  dynamic_nas_steps: -1
+  dynamic_behaviour: probs_only
+  dynamic_nas_steps: 150
   forward:
     mode: train
     softmax_temp: 5.0
@@ -16,9 +16,9 @@ nas_args:
     init_range: 0.1
 ss_args:
   debug: false
-  prob_scale: 1
-  type: basic
-  with_combinations: true
+  prob_scale: 4
+  type: dynamic_prob
+  with_combinations: false
 trainer_args:
   derive:
     derive_from_history: false
