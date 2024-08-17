@@ -54,3 +54,4 @@ src/nas/save/
 GraphNAS/Citeseer/
 GraphNAS/Cora/
 nohup.out
+src/nas/logs/out

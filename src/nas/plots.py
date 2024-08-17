@@ -1,6 +1,7 @@
 # %%
 import pandas as pd
 import re
+import os
 
 from seaborn import lineplot
 
@@ -31,19 +32,23 @@ def plot_of_count(vals: pd.DataFrame, min_val: float = 0.8, title: str = None):
 # %%
 
 logs_dir = "/home/ubuntu/GNN-AID/src/nas/logs/"
-cora_logs = [
-    logs_dir + "cora_basic.log",
-    logs_dir + "cora_fixed.log",
-    logs_dir + "cora_dynamic.log",
-]
+cora_logs = []
+for dir_name, _, fnames in os.walk(logs_dir):
+    for f in fnames:
+        if "cora" in f:
+            cora_logs.append(dir_name + f)
+    break
 
-bzr_logs = [
-    logs_dir + "bzr_basic.log",
-    logs_dir + "bzr_fixed.log"
-]
+bzr_logs = []
+for dir_name, _, fnames in os.walk(logs_dir):
+    for f in fnames:
+        if "bzr" in f:
+            bzr_logs.append(dir_name + f)
+    break
+
 # %%
 # вывести картинку
-min_val = 0.87
+min_val = 0.8
 df = pd.DataFrame()
 for log in bzr_logs:
     vals = read_log(log)
@@ -59,3 +64,5 @@ for log in bzr_logs:
     name = log.split('.')[0].split('/')[-1]
     df['count ' + name] = y[:500]
 lineplot(df)
+
+# %%

@@ -1,6 +1,7 @@
 import logging
 import torch
 import torch.nn.functional as F
+import random
 
 from enum import StrEnum
 from pydantic import BaseModel, Field
@@ -114,8 +115,6 @@ class NasController(torch.nn.Module):
         actions = []
 
         for action_name in self.ss.list:
-            decoder_i = self.ss.ind_by_name(action_name)
-
             logits, hidden = self.forward(inputs, hidden, action_name)
             if action_name == GNN.str() and \
                     self.ss.args.type == SSType.dynamic_prob and self.num_steps > self.args.dynamic_nas_steps:
@@ -154,6 +153,7 @@ class NasController(torch.nn.Module):
             entropies.append(entropy)
             log_probs.append(selected_log_prob[:, 0])
 
+            decoder_i = self.ss.ind_by_name(action_name)
             inputs = get_variable(
                 action[:, 0] + sum(self.num_tokens[:decoder_i]),
                 requires_grad=False)
@@ -174,3 +174,16 @@ class NasController(torch.nn.Module):
     #     zeros = torch.zeros(batch_size, self.args.hidden_size)
     #     return (get_variable(zeros, requires_grad=False),
     #             get_variable(zeros.clone(), requires_grad=False))
+
+
+class RandomSearchController(torch.nn.Module):
+    def __init__(self, search_space: SearchSpace, args: ControllerArgs):
+        self.ss = search_space
+        self.args = args
+    
+    def sample(self):
+        actions = []
+        for action_name in self.ss.list:
+            variants = self.ss[action_name]
+            actions.append(random.choice(variants))
+        return [actions]

@@ -64,12 +64,7 @@ logger = logging.getLogger(__name__)
 
 cfg_dir = "/home/ubuntu/GNN-AID/src/nas/cfg/"
 cfgs = [
-    cfg_dir + '1.yml',
-    cfg_dir + '2.yml',
-    cfg_dir + '3.yml',
-    cfg_dir + '4.yml',
-    cfg_dir + '5.yml',
-    cfg_dir + '6.yml',
+    cfg_dir + str(i) + '.yml' for i in range(1, 17)
 ]
 for cfg_file in cfgs:
     try:
