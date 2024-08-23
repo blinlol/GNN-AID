@@ -176,14 +176,15 @@ class NasController(torch.nn.Module):
     #             get_variable(zeros.clone(), requires_grad=False))
 
 
-class RandomSearchController(torch.nn.Module):
+class RandomSearchController():
     def __init__(self, search_space: SearchSpace, args: ControllerArgs):
         self.ss = search_space
         self.args = args
+        self.num_steps = 0
     
     def sample(self):
         actions = []
         for action_name in self.ss.list:
-            variants = self.ss[action_name]
+            variants = self.ss.dict[action_name]
             actions.append(random.choice(variants))
         return [actions]

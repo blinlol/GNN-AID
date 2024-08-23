@@ -17,7 +17,7 @@ from models_builder.gnn_models import FrameworkGNNModelManager, Metric
 
 from nas.misc import get_variable, to_item
 from nas.search_space import SearchSpace
-from nas.controller import NasController
+from nas.controller import NasController, RandomSearchController
 
 
 logger = logging.getLogger(__name__)
@@ -164,7 +164,6 @@ class Trainer:
         self.nas.train() # set training mode
         # hidden = self.nas.init_hidden()
 
-        # definitions
         total_loss = 0
         baseline = None
         adv_history = []
@@ -237,3 +236,93 @@ class Trainer:
         if max_reward == 0:
             return value
         return scale_value / max_reward * value
+
+
+class RandomTrainer:
+    def __init__(self, ss: SearchSpace, nas: RandomSearchController, args: TrainerArgs):
+        self.ss = ss
+        self.nas = nas
+        self.args = args
+    
+    def train(self):
+        num_eras = self.args.train.num_eras
+        derive_finaly = self.args.train.derive_finaly
+
+        start_time = time.time()
+
+        for era in range(num_eras):
+            era_time = time.time()
+            self.train_controller()
+            logger.info("train | %r era_time %r", era, time.time() - era_time)
+
+        if derive_finaly:
+            self.best_structure = self.derive()
+            logger.info("train | self.best_structure = %r", self.best_structure)
+        logger.info("train | train_time %r", time.time() - start_time)
+        
+    def train_controller(self):
+         # parameters
+        controller_epochs = self.args.train_controller.epochs
+
+        # init nas
+        # self.nas.train() # set training mode
+        # hidden = self.nas.init_hidden()
+
+        for step in range(controller_epochs):
+            structures = self.nas.sample()
+            # обучить модели, получить метрику (возможно внести небольшой шум в награду)
+            for gnn in structures:
+                self.eval(gnn)
+            # сравнить аналогично с топом, прокидываем лосс
+            self.nas.num_steps += 1
+
+    def eval(self, sampled_gnn):
+        """обучает переданную архитектуру и возвращает скор на валидации
+        """
+        # TODO: оптимизировать вызовы конструкторов
+
+        save_model_flag = self.args.eval.save_model_flag
+
+        manager_config = ModelManagerConfig(**{
+                "mask_features": [],
+                "optimizer": {
+                    "_class_name": "Adam",
+                    "_config_kwargs": {},
+                }
+            }
+        )
+
+        gnn = self.ss.create_gnn_structure(sampled_gnn)
+        steps = self.ss.get_train_epochs(sampled_gnn)
+
+        gnn = FrameworkGNNConstructor(
+                model_config=ModelConfig(
+                    structure=ModelStructureConfig(gnn)
+                )
+            )
+        gnn_model_manager = FrameworkGNNModelManager(
+            gnn=gnn,
+            dataset_path=self.ss.results_dataset_path,
+            manager_config=manager_config,
+            modification=ModelModificationConfig(model_ver_ind=0, epochs=steps)
+        )
+        gnn_model_manager.epochs = gnn_model_manager.modification.epochs = 0
+
+        train_test_split_path = gnn_model_manager.train_model(gen_dataset=self.ss.dataset, steps=steps,
+                                                            save_model_flag=save_model_flag,
+                                                            metrics=[Metric("Accuracy", mask='train')])
+
+        if train_test_split_path is not None:
+            self.ss.dataset.save_train_test_mask(train_test_split_path)
+            train_mask, val_mask, test_mask, train_test_sizes = torch.load(train_test_split_path / 'train_test_split')[
+                                                                :]
+            self.ss.dataset.train_mask, self.ss.dataset.val_mask, self.ss.dataset.test_mask = train_mask, val_mask, test_mask
+            self.ss.data.percent_train_class, self.ss.data.percent_test_class = train_test_sizes
+
+
+        metric = Metric("Accuracy", mask='val')
+        metric_loc = gnn_model_manager.evaluate_model(
+            gen_dataset=self.ss.dataset, metrics=[metric])
+        metric_val = metric_loc['val']['Accuracy']
+        logger.info("eval | (sampled_gnn, metric_val) = (%r, %r)", sampled_gnn, metric_val)
+        return metric_val

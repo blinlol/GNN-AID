@@ -42,13 +42,13 @@ for dir_name, _, fnames in os.walk(logs_dir):
 bzr_logs = []
 for dir_name, _, fnames in os.walk(logs_dir):
     for f in fnames:
-        if "bzr" in f:
+        if "bzr" in f and f != "bzr_dynamic-probsonly_no-combinations.log":
             bzr_logs.append(dir_name + f)
     break
 
 # %%
 # вывести картинку
-min_val = 0.8
+min_val = 0.85
 df = pd.DataFrame()
 for log in bzr_logs:
     vals = read_log(log)
@@ -63,6 +63,6 @@ for log in bzr_logs:
         y.append(cnt)
     name = log.split('.')[0].split('/')[-1]
     df['count ' + name] = y[:500]
-lineplot(df)
+lineplot(df).set_title("threshold " + str(min_val))
 
 # %%
