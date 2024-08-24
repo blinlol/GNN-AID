@@ -32,6 +32,7 @@ class ExperimentArgs(BaseModel):
     dataset: Datasets
     derive_num: int = 10
     logfname: str = Field(default_factory=lambda: dt.datetime.now().strftime("%d-%H:%M:%S"))
+    is_random: bool = Field(default=False)
 
 
 def set_logfile(fname):
@@ -52,6 +53,10 @@ def experiment(cfg_file):
     set_logfile(args.logfname)
     logger.info(to_yaml_str(args))
 
+    if args.is_random:
+        random_experiments(cfg_file, args)
+        return
+
     ss = SearchSpace(args.dataset.value, args.ss_args)
     nas = NasController(ss, args.nas_args)
     trainer = Trainer(ss, nas, args.trainer_args)
@@ -60,11 +65,7 @@ def experiment(cfg_file):
     logging.info("%r cfg_file best structure: %r", cfg_file, trainer.derive(args.derive_num))
 
 
-def random_experiments(cfg_file):
-    args = parse_yaml_file_as(ExperimentArgs, cfg_file)
-    set_logfile(args.logfname)
-    logger.info(to_yaml_str(args))
-
+def random_experiments(cfg_file, args):
     ss = SearchSpace(args.dataset.value, args.ss_args)
     nas = RandomSearchController(ss, args.nas_args)
     trainer = RandomTrainer(ss, nas, args.trainer_args)
@@ -75,6 +76,7 @@ def random_experiments(cfg_file):
 
 def create_random_configs(datasets: list[Datasets], from_i: int, debug: bool=False):
     args = ExperimentArgs(dataset=Datasets.cora)
+    args.is_random = True
     args.ss_args.debug = debug
     args.trainer_args.train.num_eras = 30
     args.trainer_args.train.save_eras = 300
@@ -141,18 +143,21 @@ logger = logging.getLogger(__name__)
 
 cfg_dir = "/home/ubuntu/GNN-AID/src/nas/cfg/"
 
-# create_random_configs([Datasets.aids], 34, True)
+# create_random_configs([d for d in Datasets], 1, False)
+# create_configs([Datasets.proteins, Datasets.aids], 20, False)
 # random_experiments(cfg_dir + "34.yml")
 
-# cfgs = [
-#     cfg_dir + str(i) + '.yml' for i in range(1, 17)
-# ]
+cfgs = [
+    cfg_dir + str(i) + '.yml' for i in range(1, 9)
+] + [
+    cfg_dir + str(i) + '.yml' for i in range(20, 36)
+]
 
-# for cfg_file in cfgs:
-#     try:
-#         experiment(cfg_file)
-#     except Exception as e:
-#         logger.error("cfg_file = %r\n%s", cfg_file, e)
+for cfg_file in cfgs:
+    try:
+        experiment(cfg_file)
+    except Exception as e:
+        logger.error("cfg_file = %r\n%s", cfg_file, e)
 
 # to_yaml_file("cfg/all.yml", ExperimentArgs(dataset=Datasets.bzr))
 # experiment(cfg_dir + "all.yml")
