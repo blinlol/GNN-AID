@@ -2,8 +2,10 @@
 import pandas as pd
 import re
 import os
+import matplotlib.pyplot as plt
 
 from seaborn import lineplot
+
 
 
 def read_log(fname: str) -> pd.DataFrame:
@@ -31,30 +33,26 @@ def plot_of_count(vals: pd.DataFrame, min_val: float = 0.8, title: str = None):
 
 # %%
 
+datasets = ["cora", "bzr", "pubmed", "citeseer", "mutag"]
 logs_dir = "/home/ubuntu/GNN-AID/src/nas/logs/"
-cora_logs = []
+logs = {d:[] for d in datasets}
 for dir_name, _, fnames in os.walk(logs_dir):
     for f in fnames:
-        if "cora" in f:
-            cora_logs.append(dir_name + f)
-    break
-
-bzr_logs = []
-for dir_name, _, fnames in os.walk(logs_dir):
-    for f in fnames:
-        if "bzr" in f and f != "bzr_dynamic-probsonly_no-combinations.log":
-            bzr_logs.append(dir_name + f)
+        for d in datasets:
+            if d in f:
+                logs[d].append(dir_name + f)
+                break
     break
 
 # %%
 # вывести картинку
-min_val = 0.85
+min_val = 0.89
 df = pd.DataFrame()
-for log in bzr_logs:
+for log in logs["mutag"]:
     vals = read_log(log)
     x = vals.index
     if df.empty:
-        df = pd.DataFrame(index=x[:500])
+        df = pd.DataFrame(index=x)
     y = []
     cnt = 0
     for val in vals.val_acc:
@@ -62,7 +60,7 @@ for log in bzr_logs:
             cnt += 1
         y.append(cnt)
     name = log.split('.')[0].split('/')[-1]
-    df['count ' + name] = y[:500]
+    df['count ' + name] = y
 lineplot(df).set_title("threshold " + str(min_val))
 
 # %%

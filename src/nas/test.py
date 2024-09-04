@@ -144,13 +144,12 @@ logger = logging.getLogger(__name__)
 cfg_dir = "/home/ubuntu/GNN-AID/src/nas/cfg/"
 
 # create_random_configs([d for d in Datasets], 1, False)
-# create_configs([Datasets.proteins, Datasets.aids], 20, False)
+# create_configs([Datasets.citeceer, Datasets.pubmed, Datasets.mutag, Datasets.cox2],
+#                1, False)
 # random_experiments(cfg_dir + "34.yml")
 
 cfgs = [
-    cfg_dir + str(i) + '.yml' for i in range(1, 9)
-] + [
-    cfg_dir + str(i) + '.yml' for i in range(20, 36)
+    cfg_dir + str(i) + '.yml' for i in range(1, 33)
 ]
 
 for cfg_file in cfgs:
