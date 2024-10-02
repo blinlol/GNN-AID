@@ -227,7 +227,6 @@ class Trainer:
         with open(fname, "rb") as f:
             return pickle.load(f)
 
-
     def scale(self, value, last_k=10, scale_value=1):
         '''
         scale value into [-scale_value, scale_value], according last_k history

@@ -1,5 +1,6 @@
 import logging
 import warnings
+import os
 import sys
 import datetime as dt
 from enum import Enum
@@ -137,7 +138,8 @@ def create_configs(datasets: list[Datasets], from_i: int, debug: bool=False):
 warnings.filterwarnings("ignore")
 
 old_stdout = sys.stdout
-sys.stdout = open("/home/ubuntu/GNN-AID/src/nas/logs/out", "w")
+# sys.stdout = open("/home/ubuntu/GNN-AID/src/nas/logs/out", "w")
+sys.stdout = open(os.devnull, "w")
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +151,7 @@ cfg_dir = "/home/ubuntu/GNN-AID/src/nas/cfg/"
 # random_experiments(cfg_dir + "34.yml")
 
 cfgs = [
-    cfg_dir + str(i) + '.yml' for i in range(1, 33)
+    cfg_dir + str(i) + '.yml' for i in range(1, 17)
 ]
 
 for cfg_file in cfgs:

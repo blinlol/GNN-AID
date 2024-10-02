@@ -33,8 +33,8 @@ def plot_of_count(vals: pd.DataFrame, min_val: float = 0.8, title: str = None):
 
 # %%
 
-datasets = ["cora", "bzr", "pubmed", "citeseer", "mutag"]
-logs_dir = "/home/ubuntu/GNN-AID/src/nas/logs/"
+datasets = ["cora", "bzr", "pubmed", "citeseer", "mutag", "cox2"]
+logs_dir = "/home/ubuntu/GNN-AID/src/nas/logs/2_cora_bzr"
 logs = {d:[] for d in datasets}
 for dir_name, _, fnames in os.walk(logs_dir):
     for f in fnames:
@@ -46,9 +46,9 @@ for dir_name, _, fnames in os.walk(logs_dir):
 
 # %%
 # вывести картинку
-min_val = 0.89
+min_val = 0.88
 df = pd.DataFrame()
-for log in logs["mutag"]:
+for log in logs[""]:
     vals = read_log(log)
     x = vals.index
     if df.empty:
