@@ -1,0 +1,57 @@
+INFO:__main__:dataset:
+- multiple-graphs
+- TUDataset
+- AIDS
+derive_num: 10
+is_random: false
+logfname: aids_dynamic-probsonly_combinations.log
+nas_args:
+  dynamic_behaviour: probs_only
+  dynamic_nas_steps: 150
+  forward:
+    mode: train
+    softmax_temp: 5.0
+    tanh_c: 2.5
+  hidden_size: 100
+  reset:
+    init_range: 0.1
+ss_args:
+  debug: false
+  prob_scale: 4
+  type: dynamic_prob
+  with_combinations: true
+trainer_args:
+  derive:
+    derive_from_history: false
+  eval:
+    save_model_flag: false
+  train:
+    derive_finaly: false
+    num_eras: 30
+    save_eras: 30
+  train_controller:
+    epochs: 20
+
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gin', 'sage', 2, 'global_mean_pool', 5500], 0.9775)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gcn', 'gmm', 2, 'global_max_pool', 5500], 0.985)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['ssg', 'gin', 2, 'global_mean_pool', 6500], 0.98)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gat', 'gcn', 2, 'global_add_pool', 4500], 0.98)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gcn', 'ssg', 2, 'global_mean_pool', 3000], 0.985)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gin', 'gmm', 2, 'global_add_pool', 7500], 0.99)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gcn', 'gat', 2, 'global_mean_pool', 7500], 0.985)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gin', 'gcn', 2, 'global_max_pool', 7000], 0.985)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gin', 'gin', 2, 'global_mean_pool', 8000], 0.9775)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['tag', 'gin', 2, 'global_mean_pool', 4500], 0.98)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gin', 'gcn', 2, 'global_max_pool', 5500], 0.9875)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gat', 'ssg', 2, 'global_mean_pool', 3500], 0.98)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gcn', 'ssg', 2, 'global_max_pool', 4500], 0.99)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gin', 'gmm', 2, 'global_mean_pool', 5000], 0.98)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gcn', 'tag', 2, 'global_max_pool', 4500], 0.9875)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gmm', 'gcn', 2, 'global_max_pool', 5000], 0.985)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gcn', 'gmm', 2, 'global_mean_pool', 7000], 0.9875)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['ssg', 'gcn', 2, 'global_max_pool', 8000], 0.99)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gat', 'gcn', 2, 'global_max_pool', 5000], 0.99)
+INFO:nas.trainer:eval | (sampled_gnn, metric_val) = (['gcn', 'gin', 2, 'global_mean_pool', 4500], 0.985)
+INFO:nas.trainer:train | 0 era_time 37990.98183655739
+ERROR:__main__:cfg_file = '/home/ubuntu/GNN-AID/src/nas/cfg/34.yml'
+[Errno 2] No such file or directory: 'save/Trainer_20.pkl'
