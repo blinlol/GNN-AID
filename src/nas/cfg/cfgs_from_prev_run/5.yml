@@ -1,0 +1,33 @@
+dataset:
+- single-graph
+- Planetoid
+- CiteSeer
+derive_num: 10
+is_random: false
+logfname: citeseer_dynamic-both_combinations.log
+nas_args:
+  dynamic_behaviour: change_both
+  dynamic_nas_steps: 150
+  forward:
+    mode: train
+    softmax_temp: 5.0
+    tanh_c: 2.5
+  hidden_size: 100
+  reset:
+    init_range: 0.1
+ss_args:
+  debug: false
+  prob_scale: 4
+  type: dynamic_prob
+  with_combinations: true
+trainer_args:
+  derive:
+    derive_from_history: false
+  eval:
+    save_model_flag: false
+  train:
+    derive_finaly: false
+    num_eras: 30
+    save_eras: 30
+  train_controller:
+    epochs: 20
