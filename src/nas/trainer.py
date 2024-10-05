@@ -72,7 +72,7 @@ class Trainer:
 
         start_time = time.time()
 
-        for era in range(num_eras):
+        for era in range(1, num_eras + 1):
             era_time = time.time()
             self.train_controller()
             logger.info("train | %r era_time %r", era, time.time() - era_time)
@@ -325,3 +325,13 @@ class RandomTrainer:
         metric_val = metric_loc['val']['Accuracy']
         logger.info("eval | (sampled_gnn, metric_val) = (%r, %r)", sampled_gnn, metric_val)
         return metric_val
+
+    def get_reward(self, sampled_gnns):
+        return list(map(self.eval, sampled_gnns))
+
+
+    def derive(self, sample_num=None):
+        sampled_structures = self.nas.sample(sample_num)
+        rewards = self.get_reward(sampled_structures)
+        min_i = np.argmax(rewards)
+        return sampled_structures[min_i]

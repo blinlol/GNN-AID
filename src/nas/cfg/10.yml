@@ -28,6 +28,6 @@ trainer_args:
   train:
     derive_finaly: false
     num_eras: 30
-    save_eras: 30
+    save_eras: 50
   train_controller:
     epochs: 20
