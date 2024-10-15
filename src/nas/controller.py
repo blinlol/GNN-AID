@@ -21,6 +21,8 @@ class DynamicBehaviourType(StrEnum):
     # менять только probs
     # влияет только на семплируемую архитектуру
     probs_only = 'probs_only'
+    # дополнительно обучаются веса, преобразующие логиты
+    raw = 'raw'
 
 
 class ControllerArgs(BaseModel):
@@ -79,6 +81,8 @@ class NasController(torch.nn.Module):
             )
             self.decoders[key] = decoder
         
+        self.raw_w = None
+
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -87,6 +91,10 @@ class NasController(torch.nn.Module):
             param.data.uniform_(-init_range, init_range)
         for decoder in self.decoders:
             self.decoders[decoder].bias.data.fill_(0)
+        
+        if self.args.dynamic_behaviour == DynamicBehaviourType.raw:
+            self.raw_w = torch.zeros((1, len(self.ss.dict[GNN.str()]))).uniform_()
+
     
     def forward(self, inputs, hidden, action):
         embed = inputs
@@ -96,6 +104,7 @@ class NasController(torch.nn.Module):
             logits = (self.args.forward.tanh_c * torch.tanh(logits))
         return logits, (hx, cx)
     
+
     def construct_action(self, actions):
         structure_list = []
         for single_action in actions:
@@ -105,6 +114,7 @@ class NasController(torch.nn.Module):
                 structure.append(predicted_actions)
             structure_list.append(structure)
         return structure_list
+
 
     def sample(self, batch_size=1, with_details=False):
         '''семплирует batch_size архитектур из пространства поиска переданного конструктором'''
@@ -117,7 +127,8 @@ class NasController(torch.nn.Module):
         for action_name in self.ss.list:
             logits, hidden = self.forward(inputs, hidden, action_name)
             if action_name == GNN.str() and \
-                    self.ss.args.type == SSType.dynamic_prob and self.num_steps > self.args.dynamic_nas_steps:
+                    self.ss.args.type == SSType.dynamic_prob and self.num_steps > self.args.dynamic_nas_steps and \
+                    self.args.dynamic_behaviour != DynamicBehaviourType.raw:
 
                 dup_indexes = self.ss.duplicated_gnns_indexes
                 main_indexes = self.ss.main_gnns_indexes
@@ -142,11 +153,19 @@ class NasController(torch.nn.Module):
                         probs = F.softmax(softmax_logits, dim=-1)
                     case _:
                         raise ValueError("dynamic_behaviour must be set")
+
+            elif action_name == GNN.str() and self.args.dynamic_behaviour == DynamicBehaviourType.raw:
+                logits = F.softmax(logits * self.raw_w, dim=-1)
+                probs = F.softmax(logits, dim=-1)
+                log_prob = F.log_softmax(logits, dim=-1)
+
             else:
                 probs = F.softmax(logits, dim=-1)
                 log_prob = F.log_softmax(logits, dim=-1)
+
             entropy = -(log_prob * probs).sum(1, keepdim=False)
             action = probs.multinomial(num_samples=1).data
+
             selected_log_prob = log_prob.gather(
                 1, get_variable(action, requires_grad=False))
 
@@ -168,6 +187,33 @@ class NasController(torch.nn.Module):
         if with_details:
             return dags, torch.cat(log_probs), torch.cat(entropies)
         return dags
+
+    
+    def update_raw_weights(self, loss, structure):
+        if self.args.dynamic_behaviour != DynamicBehaviourType.raw:
+            return
+
+        gnn_indexes = list(map(
+            lambda e: e[0],
+            filter(lambda e: e[1] == GNN.str(), enumerate(self.ss.list)))
+        )
+        used_gnns = [structure[i] for i in gnn_indexes]
+        used_gnn_indexes = [i for i, gnn in enumerate(self.ss.dict[GNN.str()])
+                                    if gnn in used_gnns]
+        
+        num_gnns = len(self.ss.dict[GNN.str()])
+        l = torch.zeros((1, num_gnns))
+        for i in used_gnn_indexes:
+            l[0, i] = loss
+        
+        eta = 0.1
+        gamma = 0.1
+        with torch.no_grad():
+            self.raw_w = self.raw_w * torch.exp((-eta) * loss) + gamma / num_gnns
+            self.raw_w = F.softmax(self.raw_w, dim=-1)
+
+
+
 
     # def init_hidden(self, batch_size=64):
     #     # batch_size за что отвечает???

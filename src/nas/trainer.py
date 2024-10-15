@@ -200,6 +200,8 @@ class Trainer:
             loss.backward()
             self.controller_optim.step()
 
+            self.nas.update_raw_weights(loss, structures[0]) # ??? мб не лосс, а ревард?
+
             total_loss += to_item(loss.data)
 
             self.nas.num_steps += 1
