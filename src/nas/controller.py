@@ -130,7 +130,7 @@ class NasController(torch.nn.Module):
                         for i in dup_indexes:
                             logits[0][i] = min_logit
                         probs = F.softmax(logits, dim=-1)
-                        log_prob = F.log_softmax(logitsgit, dim=-1)
+                        log_prob = F.log_softmax(logits, dim=-1)
                     case DynamicBehaviourType.probs_only:
                         # 2 не менять логсофтмакс, а менять только софтмакс
                         # берем софтмакс от логитов, в пробс зануляем дублированную часть, затем опять софтмакс
