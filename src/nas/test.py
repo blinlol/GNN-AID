@@ -151,11 +151,13 @@ cfg_dir = "/home/ubuntu/GNN-AID/src/nas/cfg/"
 
 # create_random_configs([d for d in Datasets], 1, False)
 # create_random_configs([Datasets.mnist, Datasets.amazon_computers, Datasets.amazon_photo], 9)
-# create_configs([Datasets.mnist],
-#                1, False)
+# create_configs([Datasets.cora, Datasets.citeceer, Datasets.pubmed, 
+#                 Datasets.mutag, Datasets.cox2, Datasets.bzr, 
+#                 Datasets.amazon_photo, Datasets.amazon_computers],
+#                 1, False)
 
 cfgs = [
-    cfg_dir + str(i) + '.yml' for i in range(1, 12)
+    cfg_dir + str(i) + '.yml' for i in range(1, 65)
 ]
 
 for cfg_file in cfgs:

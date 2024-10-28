@@ -1,10 +1,10 @@
 dataset:
-- multiple-graphs
-- pytorch-geometric-other
-- MNISTSuperpixels
+- single-graph
+- Planetoid
+- Cora
 derive_num: 10
 is_random: false
-logfname: mnistsuperpixels_dynamic-both_combinations.log
+logfname: cora_dynamic-both_combinations.log
 nas_args:
   dynamic_behaviour: change_both
   dynamic_nas_steps: 150

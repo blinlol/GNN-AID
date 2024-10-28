@@ -1,10 +1,10 @@
 dataset:
 - single-graph
-- Planetoid
-- Cora
+- Amazon
+- Photo
 derive_num: 10
 is_random: false
-logfname: cora_fixed_combinations.log
+logfname: photo_fixed_combinations.log
 nas_args:
   dynamic_behaviour: undefined
   dynamic_nas_steps: 150

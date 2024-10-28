@@ -1,13 +1,13 @@
 dataset:
-- multiple-graphs
-- pytorch-geometric-other
-- MNISTSuperpixels
+- single-graph
+- Planetoid
+- CiteSeer
 derive_num: 10
-is_random: true
-logfname: mnistsuperpixels_random.log
+is_random: false
+logfname: citeseer_basic_combinations.log
 nas_args:
   dynamic_behaviour: undefined
-  dynamic_nas_steps: -1
+  dynamic_nas_steps: 150
   forward:
     mode: train
     softmax_temp: 5.0
@@ -17,7 +17,7 @@ nas_args:
     init_range: 0.1
 ss_args:
   debug: false
-  prob_scale: 1
+  prob_scale: 4
   type: basic
   with_combinations: true
 trainer_args:
@@ -28,6 +28,6 @@ trainer_args:
   train:
     derive_finaly: false
     num_eras: 30
-    save_eras: 300
+    save_eras: 50
   train_controller:
     epochs: 20

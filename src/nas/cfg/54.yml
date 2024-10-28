@@ -1,12 +1,12 @@
 dataset:
 - single-graph
-- Planetoid
-- Cora
+- Amazon
+- Photo
 derive_num: 10
 is_random: false
-logfname: cora_fixed_combinations.log
+logfname: photo_dynamic-both_no-combinations.log
 nas_args:
-  dynamic_behaviour: undefined
+  dynamic_behaviour: change_both
   dynamic_nas_steps: 150
   forward:
     mode: train
@@ -18,8 +18,8 @@ nas_args:
 ss_args:
   debug: false
   prob_scale: 4
-  type: fixed_prob
-  with_combinations: true
+  type: dynamic_prob
+  with_combinations: false
 trainer_args:
   derive:
     derive_from_history: false

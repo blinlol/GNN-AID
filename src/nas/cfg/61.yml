@@ -1,12 +1,12 @@
 dataset:
 - single-graph
-- Planetoid
-- Cora
+- Amazon
+- Computers
 derive_num: 10
 is_random: false
-logfname: cora_fixed_combinations.log
+logfname: computers_dynamic-both_combinations.log
 nas_args:
-  dynamic_behaviour: undefined
+  dynamic_behaviour: change_both
   dynamic_nas_steps: 150
   forward:
     mode: train
@@ -18,7 +18,7 @@ nas_args:
 ss_args:
   debug: false
   prob_scale: 4
-  type: fixed_prob
+  type: dynamic_prob
   with_combinations: true
 trainer_args:
   derive:
