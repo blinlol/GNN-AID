@@ -150,27 +150,27 @@ logger = logging.getLogger(__name__)
 cfg_dir = "/home/ubuntu/GNN-AID/src/nas/cfg/"
 
 # create_random_configs([d for d in Datasets], 1, False)
-# create_configs([Datasets.mnist, Datasets.amazon_computers, Datasets.amazon_photo],
+# create_random_configs([Datasets.mnist, Datasets.amazon_computers, Datasets.amazon_photo], 9)
+# create_configs([Datasets.mnist],
 #                1, False)
-# random_experiments(cfg_dir + "34.yml")
 
 cfgs = [
-    cfg_dir + str(i) + '.yml' for i in range(1, 25)
+    cfg_dir + str(i) + '.yml' for i in range(1, 12)
 ]
 
-# for cfg_file in cfgs:
-#     try:
-#         experiment(cfg_file)
-#     except Exception as e:
-#         logger.error("cfg_file = %r\n%s", cfg_file, e)
+for cfg_file in cfgs:
+    try:
+        experiment(cfg_file)
+    except Exception as e:
+        logger.error("cfg_file = %r\n%s", cfg_file, e)
 
 # to_yaml_file("cfg/all.yml", ExperimentArgs(dataset=Datasets.bzr))
 # experiment(cfg_dir + "all.yml")
 
 
 
-ss = SearchSpace(Datasets.cora.value, SearchSpaceArgs(debug=False))
-nas = NasController(ss, ControllerArgs(dynamic_behaviour=DynamicBehaviourType.raw))
-trainer = Trainer(ss, nas, TrainerArgs())
+# ss = SearchSpace(Datasets.cora.value, SearchSpaceArgs(debug=False))
+# nas = NasController(ss, ControllerArgs(dynamic_behaviour=DynamicBehaviourType.raw))
+# trainer = Trainer(ss, nas, TrainerArgs())
 
-trainer.train()
+# trainer.train()

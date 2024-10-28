@@ -1,4 +1,5 @@
 # %%
+import numpy as np
 import pandas as pd
 import re
 import os
@@ -93,6 +94,36 @@ for log in logs["photo"]:
     df[name] = y
 plt.figure(figsize=(10, 8))
 lineplot(df.loc[50:, :]).set_title("max accuracy")
+
+# %%
+# создать csv таблицу с данными о результатах
+# dataset 1st_method_place ...
+
+df_data = {
+    'dataset': [],
+}
+datasets = ["cora", "bzr", "pubmed", "citeseer", "mutag", "cox2", 
+            "computers", "photo"]
+fname = 'results_argmax_epoch.csv'
+
+for dataset in datasets:
+    places = []
+    for log in logs[dataset]:
+        vals = read_log(log)
+        name = log.split('.')[0].split('/')[-1]
+        name = name[name.index('_') + 1:]
+        if name == "random":
+            continue
+        argmax = np.argmax(vals['val_acc'])
+        places.append((vals['val_acc'][argmax], name, argmax))
+
+    df_data['dataset'].append(dataset)
+    for max_acc, name, argmax in places:
+        if name not in df_data:
+            df_data[name] = []
+        df_data[name].append(argmax)
+df = pd.DataFrame(df_data)
+df.to_csv("/home/ubuntu/GNN-AID/src/nas/" + fname)
 
 
 #%%
