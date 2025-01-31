@@ -1,0 +1,9 @@
+,dataset,basic_combinations,dynamic-both_no-combinations,fixed_no-combinations,dynamic-probsonly_no-combinations,fixed_combinations,basic_no-combinations,dynamic-probsonly_combinations,dynamic-both_combinations
+0,cora,68,386,561,385,240,358,144,91
+1,bzr,221,519,147,627,457,419,275,118
+2,pubmed,549,150,142,108,482,590,357,91
+3,citeseer,209,183,292,223,424,415,107,219
+4,mutag,102,1,502,526,579,73,258,24
+5,cox2,437,242,231,130,400,66,112,374
+6,computers,562,311,285,51,289,366,354,61
+7,photo,264,223,398,253,216,366,383,33

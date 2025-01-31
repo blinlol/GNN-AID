@@ -25,6 +25,10 @@ class Datasets(Enum):
     proteins = ['multiple-graphs', 'TUDataset', 'PROTEINS']
     aids = ['multiple-graphs', 'TUDataset', 'AIDS']
 
+    mnist = ['multiple-graphs', 'pytorch-geometric-other', 'MNISTSuperpixels']
+    amazon_computers = ['single-graph', 'Amazon', 'Computers']
+    amazon_photo = ['single-graph', 'Amazon', 'Photo']
+
 
 class ExperimentArgs(BaseModel):
     nas_args: ControllerArgs = Field(default_factory=ControllerArgs)
@@ -106,7 +110,7 @@ def create_configs(datasets: list[Datasets], from_i: int, debug: bool=False):
     args.ss_args.debug = debug
     args.nas_args.dynamic_nas_steps = 150
     args.trainer_args.train.num_eras = 30
-    args.trainer_args.train.save_eras = 30
+    args.trainer_args.train.save_eras = 50
     args.trainer_args.train_controller.epochs = 20
     args.ss_args.prob_scale = 4
 
@@ -146,27 +150,29 @@ logger = logging.getLogger(__name__)
 cfg_dir = "/home/ubuntu/GNN-AID/src/nas/cfg/"
 
 # create_random_configs([d for d in Datasets], 1, False)
-# create_configs([Datasets.citeceer, Datasets.pubmed, Datasets.mutag, Datasets.cox2],
-#                1, False)
-# random_experiments(cfg_dir + "34.yml")
+# create_random_configs([Datasets.mnist, Datasets.amazon_computers, Datasets.amazon_photo], 9)
+# create_configs([Datasets.cora, Datasets.citeceer, Datasets.pubmed, 
+#                 Datasets.mutag, Datasets.cox2, Datasets.bzr, 
+#                 Datasets.amazon_photo, Datasets.amazon_computers],
+#                 1, False)
 
-# cfgs = [
-#     cfg_dir + str(i) + '.yml' for i in range(1, 17)
-# ]
+cfgs = [
+    cfg_dir + str(i) + '.yml' for i in range(1, 65)
+]
 
-# for cfg_file in cfgs:
-#     try:
-#         experiment(cfg_file)
-#     except Exception as e:
-#         logger.error("cfg_file = %r\n%s", cfg_file, e)
+for cfg_file in cfgs:
+    try:
+        experiment(cfg_file)
+    except Exception as e:
+        logger.error("cfg_file = %r\n%s", cfg_file, e)
 
 # to_yaml_file("cfg/all.yml", ExperimentArgs(dataset=Datasets.bzr))
 # experiment(cfg_dir + "all.yml")
 
 
 
-ss = SearchSpace(Datasets.cora.value, SearchSpaceArgs(debug=False))
-nas = NasController(ss, ControllerArgs(dynamic_behaviour=DynamicBehaviourType.raw))
-trainer = Trainer(ss, nas, TrainerArgs())
+# ss = SearchSpace(Datasets.cora.value, SearchSpaceArgs(debug=False))
+# nas = NasController(ss, ControllerArgs(dynamic_behaviour=DynamicBehaviourType.raw))
+# trainer = Trainer(ss, nas, TrainerArgs())
 
-trainer.train()
+# trainer.train()

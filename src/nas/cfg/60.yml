@@ -1,0 +1,33 @@
+dataset:
+- single-graph
+- Amazon
+- Computers
+derive_num: 10
+is_random: false
+logfname: computers_fixed_no-combinations.log
+nas_args:
+  dynamic_behaviour: undefined
+  dynamic_nas_steps: 150
+  forward:
+    mode: train
+    softmax_temp: 5.0
+    tanh_c: 2.5
+  hidden_size: 100
+  reset:
+    init_range: 0.1
+ss_args:
+  debug: false
+  prob_scale: 4
+  type: fixed_prob
+  with_combinations: false
+trainer_args:
+  derive:
+    derive_from_history: false
+  eval:
+    save_model_flag: false
+  train:
+    derive_finaly: false
+    num_eras: 30
+    save_eras: 50
+  train_controller:
+    epochs: 20
