@@ -33,7 +33,7 @@ def plot_of_count(vals: pd.DataFrame, min_val: float = 0.8, title: str = None):
 
 # %%
 
-datasets = ["cora", "bzr", "pubmed", "citeseer", "mutag", "cox2", "aids", "proteins"]
+datasets = ["cora", "bzr", "pubmed", "citeseer", "mutag", "cox2"]
 logs_dir = "/home/ubuntu/GNN-AID/src/nas/logs/"
 logs = {d:[] for d in datasets}
 for dir_name, _, fnames in os.walk(logs_dir):
@@ -93,6 +93,31 @@ for log in logs["pubmed"]:
 plt.figure(figsize=(10, 8))
 lineplot(df.loc[50:, :]).set_title("max accuracy")
 
+
+# %%
+# создать csv таблицу с данными о результатах
+# dataset 1st_method_place ...
+
+df_data = {
+    'dataset': [],
+}
+
+for dataset in datasets:
+    places = []
+    for log in logs[dataset]:
+        vals = read_log(log)
+        name = log.split('.')[0].split('/')[-1]
+        name = name[name.index('_') + 1:]
+        places.append((max(vals['val_acc']), name))
+
+    df_data['dataset'].append(dataset)
+    for place, (_, name) in enumerate(sorted(places, reverse=True)):
+        if name not in df_data:
+            df_data[name] = []
+        df_data[name].append(place + 1)
+
+df = pd.DataFrame(df_data)
+df.to_csv("/home/ubuntu/GNN-AID/src/nas/results.csv")
 
 #%%
 
