@@ -1,0 +1,289 @@
+,dataset,threshold,method,count
+0,cora,0.87,basic no-combinations,518
+1,cora,0.88,basic no-combinations,428
+2,cora,0.89,basic no-combinations,158
+3,cora,0.9,basic no-combinations,4
+4,cora,0.87,basic combinations,414
+5,cora,0.88,basic combinations,231
+6,cora,0.89,basic combinations,21
+7,cora,0.9,basic combinations,0
+8,cora,0.87,fixed no-combinations,75
+9,cora,0.88,fixed no-combinations,3
+10,cora,0.89,fixed no-combinations,0
+11,cora,0.9,fixed no-combinations,0
+12,cora,0.87,fixed combinations,398
+13,cora,0.88,fixed combinations,88
+14,cora,0.89,fixed combinations,0
+15,cora,0.9,fixed combinations,0
+16,cora,0.87,dynamic-probsonly no-combinations,375
+17,cora,0.88,dynamic-probsonly no-combinations,281
+18,cora,0.89,dynamic-probsonly no-combinations,105
+19,cora,0.9,dynamic-probsonly no-combinations,11
+20,cora,0.87,dynamic-probsonly combinations,338
+21,cora,0.88,dynamic-probsonly combinations,203
+22,cora,0.89,dynamic-probsonly combinations,42
+23,cora,0.9,dynamic-probsonly combinations,0
+24,cora,0.87,dynamic-both no-combinations,570
+25,cora,0.88,dynamic-both no-combinations,522
+26,cora,0.89,dynamic-both no-combinations,185
+27,cora,0.9,dynamic-both no-combinations,11
+28,cora,0.87,dynamic-both combinations,531
+29,cora,0.88,dynamic-both combinations,458
+30,cora,0.89,dynamic-both combinations,107
+31,cora,0.9,dynamic-both combinations,0
+32,cora,0.87,random,110
+33,cora,0.88,random,16
+34,cora,0.89,random,0
+35,cora,0.9,random,0
+36,citeseer,0.74,basic no-combinations,148
+37,citeseer,0.75,basic no-combinations,1
+38,citeseer,0.76,basic no-combinations,0
+39,citeseer,0.77,basic no-combinations,0
+40,citeseer,0.74,basic combinations,550
+41,citeseer,0.75,basic combinations,515
+42,citeseer,0.76,basic combinations,387
+43,citeseer,0.77,basic combinations,222
+44,citeseer,0.74,fixed no-combinations,568
+45,citeseer,0.75,fixed no-combinations,543
+46,citeseer,0.76,fixed no-combinations,449
+47,citeseer,0.77,fixed no-combinations,288
+48,citeseer,0.74,fixed combinations,405
+49,citeseer,0.75,fixed combinations,102
+50,citeseer,0.76,fixed combinations,1
+51,citeseer,0.77,fixed combinations,0
+52,citeseer,0.74,dynamic-probsonly no-combinations,487
+53,citeseer,0.75,dynamic-probsonly no-combinations,245
+54,citeseer,0.76,dynamic-probsonly no-combinations,31
+55,citeseer,0.77,dynamic-probsonly no-combinations,1
+56,citeseer,0.74,dynamic-probsonly combinations,238
+57,citeseer,0.75,dynamic-probsonly combinations,117
+58,citeseer,0.76,dynamic-probsonly combinations,39
+59,citeseer,0.77,dynamic-probsonly combinations,5
+60,citeseer,0.74,dynamic-both no-combinations,542
+61,citeseer,0.75,dynamic-both no-combinations,400
+62,citeseer,0.76,dynamic-both no-combinations,117
+63,citeseer,0.77,dynamic-both no-combinations,5
+64,citeseer,0.74,dynamic-both combinations,505
+65,citeseer,0.75,dynamic-both combinations,346
+66,citeseer,0.76,dynamic-both combinations,96
+67,citeseer,0.77,dynamic-both combinations,7
+68,citeseer,0.74,random,210
+69,citeseer,0.75,random,93
+70,citeseer,0.76,random,8
+71,citeseer,0.77,random,0
+72,pubmed,0.84,basic no-combinations,546
+73,pubmed,0.85,basic no-combinations,416
+74,pubmed,0.86,basic no-combinations,322
+75,pubmed,0.87,basic no-combinations,0
+76,pubmed,0.84,basic combinations,540
+77,pubmed,0.85,basic combinations,440
+78,pubmed,0.86,basic combinations,239
+79,pubmed,0.87,basic combinations,6
+80,pubmed,0.84,fixed no-combinations,546
+81,pubmed,0.85,fixed no-combinations,442
+82,pubmed,0.86,fixed no-combinations,259
+83,pubmed,0.87,fixed no-combinations,0
+84,pubmed,0.84,fixed combinations,481
+85,pubmed,0.85,fixed combinations,241
+86,pubmed,0.86,fixed combinations,40
+87,pubmed,0.87,fixed combinations,0
+88,pubmed,0.84,dynamic-probsonly no-combinations,452
+89,pubmed,0.85,dynamic-probsonly no-combinations,282
+90,pubmed,0.86,dynamic-probsonly no-combinations,194
+91,pubmed,0.87,dynamic-probsonly no-combinations,50
+92,pubmed,0.84,dynamic-probsonly combinations,180
+93,pubmed,0.85,dynamic-probsonly combinations,82
+94,pubmed,0.86,dynamic-probsonly combinations,5
+95,pubmed,0.87,dynamic-probsonly combinations,0
+96,pubmed,0.84,dynamic-both no-combinations,570
+97,pubmed,0.85,dynamic-both no-combinations,458
+98,pubmed,0.86,dynamic-both no-combinations,275
+99,pubmed,0.87,dynamic-both no-combinations,19
+100,pubmed,0.84,dynamic-both combinations,467
+101,pubmed,0.85,dynamic-both combinations,358
+102,pubmed,0.86,dynamic-both combinations,147
+103,pubmed,0.87,dynamic-both combinations,1
+104,pubmed,0.84,random,211
+105,pubmed,0.85,random,126
+106,pubmed,0.86,random,43
+107,pubmed,0.87,random,0
+108,photo,0.91,basic no-combinations,463
+109,photo,0.92,basic no-combinations,381
+110,photo,0.93,basic no-combinations,274
+111,photo,0.94,basic no-combinations,61
+112,photo,0.91,basic combinations,462
+113,photo,0.92,basic combinations,354
+114,photo,0.93,basic combinations,137
+115,photo,0.94,basic combinations,31
+116,photo,0.91,fixed no-combinations,444
+117,photo,0.92,fixed no-combinations,367
+118,photo,0.93,fixed no-combinations,303
+119,photo,0.94,fixed no-combinations,119
+120,photo,0.91,fixed combinations,398
+121,photo,0.92,fixed combinations,186
+122,photo,0.93,fixed combinations,71
+123,photo,0.94,fixed combinations,2
+124,photo,0.91,dynamic-probsonly no-combinations,377
+125,photo,0.92,dynamic-probsonly no-combinations,277
+126,photo,0.93,dynamic-probsonly no-combinations,177
+127,photo,0.94,dynamic-probsonly no-combinations,98
+128,photo,0.91,dynamic-probsonly combinations,328
+129,photo,0.92,dynamic-probsonly combinations,211
+130,photo,0.93,dynamic-probsonly combinations,95
+131,photo,0.94,dynamic-probsonly combinations,34
+132,photo,0.91,dynamic-both no-combinations,451
+133,photo,0.92,dynamic-both no-combinations,354
+134,photo,0.93,dynamic-both no-combinations,251
+135,photo,0.94,dynamic-both no-combinations,77
+136,photo,0.91,dynamic-both combinations,524
+137,photo,0.92,dynamic-both combinations,480
+138,photo,0.93,dynamic-both combinations,396
+139,photo,0.94,dynamic-both combinations,117
+140,photo,0.91,random,206
+141,photo,0.92,random,128
+142,photo,0.93,random,43
+143,photo,0.94,random,11
+144,computers,0.86,basic no-combinations,412
+145,computers,0.87,basic no-combinations,372
+146,computers,0.88,basic no-combinations,309
+147,computers,0.89,basic no-combinations,206
+148,computers,0.86,basic combinations,319
+149,computers,0.87,basic combinations,226
+150,computers,0.88,basic combinations,121
+151,computers,0.89,basic combinations,37
+152,computers,0.86,fixed no-combinations,334
+153,computers,0.87,fixed no-combinations,265
+154,computers,0.88,fixed no-combinations,148
+155,computers,0.89,fixed no-combinations,56
+156,computers,0.86,fixed combinations,309
+157,computers,0.87,fixed combinations,230
+158,computers,0.88,fixed combinations,128
+159,computers,0.89,fixed combinations,37
+160,computers,0.86,dynamic-probsonly no-combinations,176
+161,computers,0.87,dynamic-probsonly no-combinations,120
+162,computers,0.88,dynamic-probsonly no-combinations,65
+163,computers,0.89,dynamic-probsonly no-combinations,27
+164,computers,0.86,dynamic-probsonly combinations,151
+165,computers,0.87,dynamic-probsonly combinations,108
+166,computers,0.88,dynamic-probsonly combinations,66
+167,computers,0.89,dynamic-probsonly combinations,20
+168,computers,0.86,dynamic-both no-combinations,371
+169,computers,0.87,dynamic-both no-combinations,314
+170,computers,0.88,dynamic-both no-combinations,241
+171,computers,0.89,dynamic-both no-combinations,148
+172,computers,0.86,dynamic-both combinations,143
+173,computers,0.87,dynamic-both combinations,84
+174,computers,0.88,dynamic-both combinations,37
+175,computers,0.89,dynamic-both combinations,7
+176,computers,0.86,random,92
+177,computers,0.87,random,71
+178,computers,0.88,random,56
+179,computers,0.89,random,27
+180,mutag,0.86,basic no-combinations,6
+181,mutag,0.89,basic no-combinations,1
+182,mutag,0.92,basic no-combinations,0
+183,mutag,0.95,basic no-combinations,0
+184,mutag,0.86,basic combinations,373
+185,mutag,0.89,basic combinations,187
+186,mutag,0.92,basic combinations,32
+187,mutag,0.95,basic combinations,0
+188,mutag,0.86,fixed no-combinations,6
+189,mutag,0.89,fixed no-combinations,2
+190,mutag,0.92,fixed no-combinations,1
+191,mutag,0.95,fixed no-combinations,0
+192,mutag,0.86,fixed combinations,49
+193,mutag,0.89,fixed combinations,6
+194,mutag,0.92,fixed combinations,1
+195,mutag,0.95,fixed combinations,0
+196,mutag,0.86,dynamic-probsonly no-combinations,379
+197,mutag,0.89,dynamic-probsonly no-combinations,129
+198,mutag,0.92,dynamic-probsonly no-combinations,26
+199,mutag,0.95,dynamic-probsonly no-combinations,1
+200,mutag,0.86,dynamic-probsonly combinations,24
+201,mutag,0.89,dynamic-probsonly combinations,4
+202,mutag,0.92,dynamic-probsonly combinations,1
+203,mutag,0.95,dynamic-probsonly combinations,0
+204,mutag,0.86,dynamic-both no-combinations,516
+205,mutag,0.89,dynamic-both no-combinations,455
+206,mutag,0.92,dynamic-both no-combinations,370
+207,mutag,0.95,dynamic-both no-combinations,121
+208,mutag,0.86,dynamic-both combinations,442
+209,mutag,0.89,dynamic-both combinations,313
+210,mutag,0.92,dynamic-both combinations,126
+211,mutag,0.95,dynamic-both combinations,5
+212,mutag,0.86,random,189
+213,mutag,0.89,random,133
+214,mutag,0.92,random,77
+215,mutag,0.95,random,6
+216,cox2,0.84,basic no-combinations,418
+217,cox2,0.86,basic no-combinations,185
+218,cox2,0.88,basic no-combinations,36
+219,cox2,0.9,basic no-combinations,0
+220,cox2,0.84,basic combinations,32
+221,cox2,0.86,basic combinations,4
+222,cox2,0.88,basic combinations,0
+223,cox2,0.9,basic combinations,0
+224,cox2,0.84,fixed no-combinations,131
+225,cox2,0.86,fixed no-combinations,21
+226,cox2,0.88,fixed no-combinations,2
+227,cox2,0.9,fixed no-combinations,0
+228,cox2,0.84,fixed combinations,331
+229,cox2,0.86,fixed combinations,150
+230,cox2,0.88,fixed combinations,38
+231,cox2,0.9,fixed combinations,3
+232,cox2,0.84,dynamic-probsonly no-combinations,343
+233,cox2,0.86,dynamic-probsonly no-combinations,187
+234,cox2,0.88,dynamic-probsonly no-combinations,54
+235,cox2,0.9,dynamic-probsonly no-combinations,5
+236,cox2,0.84,dynamic-probsonly combinations,2
+237,cox2,0.86,dynamic-probsonly combinations,0
+238,cox2,0.88,dynamic-probsonly combinations,0
+239,cox2,0.9,dynamic-probsonly combinations,0
+240,cox2,0.84,dynamic-both no-combinations,91
+241,cox2,0.86,dynamic-both no-combinations,33
+242,cox2,0.88,dynamic-both no-combinations,7
+243,cox2,0.9,dynamic-both no-combinations,1
+244,cox2,0.84,dynamic-both combinations,519
+245,cox2,0.86,dynamic-both combinations,379
+246,cox2,0.88,dynamic-both combinations,207
+247,cox2,0.9,dynamic-both combinations,80
+248,cox2,0.84,random,174
+249,cox2,0.86,random,64
+250,cox2,0.88,random,8
+251,cox2,0.9,random,2
+252,bzr,0.82,basic no-combinations,156
+253,bzr,0.84,basic no-combinations,36
+254,bzr,0.86,basic no-combinations,11
+255,bzr,0.88,basic no-combinations,2
+256,bzr,0.82,basic combinations,562
+257,bzr,0.84,basic combinations,411
+258,bzr,0.86,basic combinations,300
+259,bzr,0.88,basic combinations,66
+260,bzr,0.82,fixed no-combinations,432
+261,bzr,0.84,fixed no-combinations,217
+262,bzr,0.86,fixed no-combinations,125
+263,bzr,0.88,fixed no-combinations,17
+264,bzr,0.82,fixed combinations,246
+265,bzr,0.84,fixed combinations,78
+266,bzr,0.86,fixed combinations,36
+267,bzr,0.88,fixed combinations,3
+268,bzr,0.82,dynamic-probsonly no-combinations,166
+269,bzr,0.84,dynamic-probsonly no-combinations,45
+270,bzr,0.86,dynamic-probsonly no-combinations,19
+271,bzr,0.88,dynamic-probsonly no-combinations,1
+272,bzr,0.82,dynamic-probsonly combinations,469
+273,bzr,0.84,dynamic-probsonly combinations,290
+274,bzr,0.86,dynamic-probsonly combinations,201
+275,bzr,0.88,dynamic-probsonly combinations,60
+276,bzr,0.82,dynamic-both no-combinations,75
+277,bzr,0.84,dynamic-both no-combinations,14
+278,bzr,0.86,dynamic-both no-combinations,3
+279,bzr,0.88,dynamic-both no-combinations,0
+280,bzr,0.82,dynamic-both combinations,172
+281,bzr,0.84,dynamic-both combinations,53
+282,bzr,0.86,dynamic-both combinations,25
+283,bzr,0.88,dynamic-both combinations,4
+284,bzr,0.82,random,519
+285,bzr,0.84,random,417
+286,bzr,0.86,random,301
+287,bzr,0.88,random,86

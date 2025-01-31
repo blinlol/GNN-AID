@@ -113,6 +113,7 @@ class Trainer:
                     structure=ModelStructureConfig(gnn)
                 )
             )
+
         gnn_model_manager = FrameworkGNNModelManager(
             gnn=gnn,
             dataset_path=self.ss.results_dataset_path,

@@ -36,7 +36,7 @@ def plot_of_count(vals: pd.DataFrame, min_val: float = 0.8, title: str = None):
 
 datasets = ["cora", "bzr", "pubmed", "citeseer", "mutag", "cox2", "aids", "proteins", 
             "computers", "mnistsuperpixels", "photo"]
-logs_dir = "/home/ubuntu/GNN-AID/src/nas/logs/"
+logs_dir = "/home/ubuntu/GNN-AID/src/nas/logs/many_logs/"
 logs = {d:[] for d in datasets}
 for dir_name, _, fnames in os.walk(logs_dir):
     for f in fnames:
@@ -48,9 +48,9 @@ for dir_name, _, fnames in os.walk(logs_dir):
 
 # %%
 # вывести картинку количества архитектур преодолевших порог
-min_val = 0.93
+min_val = 0.82
 df = pd.DataFrame()
-for log in logs["photo"]:
+for log in logs["bzr"]:
     vals = read_log(log)
     x = vals.index
     if df.empty:
@@ -112,8 +112,8 @@ for dataset in datasets:
         vals = read_log(log)
         name = log.split('.')[0].split('/')[-1]
         name = name[name.index('_') + 1:]
-        if name == "random":
-            continue
+        # if name == "random":
+        #     continue
         argmax = np.argmax(vals['val_acc'])
         places.append((vals['val_acc'][argmax], name, argmax))
 
@@ -124,6 +124,70 @@ for dataset in datasets:
         df_data[name].append(argmax)
 df = pd.DataFrame(df_data)
 df.to_csv("/home/ubuntu/GNN-AID/src/nas/" + fname)
+
+#%%
+# создать csv с данными о количестве архитектур, преодолевших порог
+# dataset threshold name_1 cnt_1
+
+fname = 'results_cnt.csv'
+methods_names = ["basic no-combinations",
+                "basic combinations",
+                "fixed no-combinations",
+                "fixed combinations",
+                "dynamic-probsonly no-combinations",
+                "dynamic-probsonly combinations",
+                "dynamic-both no-combinations",
+                "dynamic-both combinations",
+                "random"]
+
+dataset_thresholds = {
+    'cora': [0.87, 0.88, 0.89, 0.9],
+    'citeseer': [0.74, 0.75, 0.76, 0.77],
+    'pubmed': [0.84, 0.85, 0.86, 0.87],
+    'photo': [0.91, 0.92, 0.93, 0.94],
+    'computers': [0.86, 0.87, 0.88, 0.89],
+    'mutag': [0.86, 0.89, 0.92, 0.95],
+    'cox2': [0.84, 0.86, 0.88, 0.9],
+    'bzr': [0.82, 0.84, 0.86, 0.88],
+}
+
+min_val = 0.93
+data = {
+    'dataset': [],
+    'threshold': [],
+    'method': [],
+    'count': [],
+}
+# data.update(((name, []) for name in methods_names))
+for dataset, thresholds in dataset_thresholds.items():
+    name_th_cnt = []
+    for log in logs[dataset]:
+        vals = read_log(log)
+        name = log.split('.')[0].split('/')[-1]
+        name = name[name.index('_') + 1:]
+        name = re.sub('_', ' ', name)
+        for th in thresholds:
+            cnt = 0
+            for val in vals.val_acc:
+                if th <= val:
+                    cnt += 1
+            name_th_cnt.append((name, th, cnt))
+        
+    for name in methods_names:
+        for _, th, cnt in sorted(filter(lambda e: e[0] == name, name_th_cnt)):
+            data["dataset"].append(dataset)
+            data["threshold"].append(th)
+            data["method"].append(name)
+            data["count"].append(cnt)
+
+df = pd.DataFrame(data)
+df.to_csv(fname)
+
+#%%
+
+import seaborn as sn
+
+sn.barplot(df, x='dataset', y='count', hue='method', errorbar=None)
 
 
 #%%
